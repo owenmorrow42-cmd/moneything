@@ -227,7 +227,7 @@ function fmts(n) { return "$" + Math.abs(Math.round(n)).toLocaleString(); }
 // ─── GOOGLE SHEETS SYNC CONFIG ───────────────────────────────────────────────
 // Paste your Apps Script Web App URL here after setup:
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8S3rC7s1SGF0WTyc7KjrLeTNOOWeMUiMVQvF2YNlmzC6D9EuDlBIc9dcwB3iUiAXu/exec";
-const SYNC_ENABLED = SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbw8S3rC7s1SGF0WTyc7KjrLeTNOOWeMUiMVQvF2YNlmzC6D9EuDlBIc9dcwB3iUiAXu/exec";
+const SYNC_ENABLED = SCRIPT_URL !== "YOUR_SCRIPT_URL_HERE";
 
 // ─── STATE ──────────────────────────────────────────────────────────────────
 let state = { act: {}, ui: {}, alloc: JSON.parse(JSON.stringify(DEF_ALLOC)) };
