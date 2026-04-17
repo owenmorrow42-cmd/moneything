@@ -281,36 +281,48 @@ async function pushToSheets() {
   const payload = JSON.stringify({ act: state.act, alloc: state.alloc });
   if (payload === lastSyncedJSON) { setSyncStatus("saved"); return; }
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "save", data: payload }),
-    });
-    const json = await res.json();
-    if (json.status === "ok") { lastSyncedJSON = payload; setSyncStatus("saved"); }
-    else { setSyncStatus("error"); }
+    const encoded = encodeURIComponent(payload);
+    await fetch(SCRIPT_URL + "?action=save&data=" + encoded, { mode: "no-cors" });
+    lastSyncedJSON = payload;
+    setSyncStatus("saved");
   } catch(e) { setSyncStatus("error"); }
 }
 
 async function pullFromSheets() {
   if (!SYNC_ENABLED) { setSyncStatus("offline"); return; }
   setSyncStatus("loading");
-  try {
-    const res = await fetch(SCRIPT_URL + "?action=load");
-    const json = await res.json();
-    if (json.status === "ok" && json.data) {
-      const d = JSON.parse(json.data);
-      // Merge: remote wins for act & alloc, keep local ui (scroll/open state)
-      const localUI = state.ui;
-      state.act   = d.act   || {};
-      state.alloc = d.alloc || JSON.parse(JSON.stringify(DEF_ALLOC));
-      state.ui    = localUI;
-      saveStateLocal();
-      lastSyncedJSON = JSON.stringify({ act: state.act, alloc: state.alloc });
-      setSyncStatus("saved");
-    } else {
-      setSyncStatus(json.data === null ? "saved" : "error");
-    }
-  } catch(e) { setSyncStatus("error"); }
+  return new Promise((resolve) => {
+    const cbName = "syncCb_" + Date.now();
+    const script = document.createElement("script");
+    const timer = setTimeout(() => {
+      delete window[cbName];
+      script.remove();
+      setSyncStatus("error");
+      resolve();
+    }, 8000);
+    window[cbName] = (json) => {
+      clearTimeout(timer);
+      delete window[cbName];
+      script.remove();
+      try {
+        if (json.status === "ok" && json.data) {
+          const d = JSON.parse(json.data);
+          const localUI = state.ui;
+          state.act   = d.act   || {};
+          state.alloc = d.alloc || JSON.parse(JSON.stringify(DEF_ALLOC));
+          state.ui    = localUI;
+          saveStateLocal();
+          lastSyncedJSON = JSON.stringify({ act: state.act, alloc: state.alloc });
+          setSyncStatus("saved");
+        } else {
+          setSyncStatus(json.data === null ? "saved" : "error");
+        }
+      } catch(e) { setSyncStatus("error"); }
+      resolve();
+    };
+    script.src = SCRIPT_URL + "?action=load&callback=" + cbName;
+    document.head.appendChild(script);
+  });
 }
 
 // ─── COMPUTED ────────────────────────────────────────────────────────────────
