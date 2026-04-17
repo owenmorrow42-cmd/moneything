@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Owen's Summer 2026 Savings</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#1e2d42;
+    --border:#2a3a52;--border2:#354a66;
+    --bc:#3b82f6;--bcbg:#1e3a5f;
+    --ml:#22c55e;--mlbg:#14391f;
+    --fr:#f59e0b;--frbg:#3d2e0a;
+    --off:#64748b;--offbg:#1e2a38;
+    --wk:#334155;--wkbg:#141e2e;
+    --ahead:#4ade80;--behind:#fb923c;
+    --txt:#e2e8f0;--txt2:#94a3b8;--txt3:#64748b;
+    --accent:#6366f1;
+    --red:#ef4444;--green:#22c55e;
+    --radius:12px;
+  }
+  html{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh}
+  body{max-width:860px;margin:0 auto;padding:16px 12px 40px}
+  h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
+  h2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+  .mono{font-family:'DM Mono',monospace}
+
+  /* Dashboard */
+  .dash{background:linear-gradient(135deg,#0d1629 0%,#152040 100%);border:1px solid var(--border2);border-radius:16px;padding:20px 18px;margin-bottom:16px}
+  .dash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+  .dash-sub{font-size:11px;color:var(--txt3);margin-top:3px}
+  .days-logged{text-align:right;font-size:11px;color:var(--txt3)}
+  .days-logged b{display:block;font-size:17px;font-weight:700;color:var(--txt);font-family:'DM Mono',monospace}
+
+  /* Ahead/behind pill */
+  .pace-box{border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:center;transition:background 0.3s,border 0.3s}
+  .pace-box.neutral{background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.2)}
+  .pace-box.ahead{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.25)}
+  .pace-box.behind{background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.25)}
+  .pace-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+  .pace-amt{font-size:34px;font-weight:800;font-family:'Syne',sans-serif;line-height:1}
+  .pace-note{font-size:11px;color:var(--txt3);margin-top:4px}
+
+  /* Progress bar */
+  .bar-wrap{margin-bottom:14px}
+  .bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);margin-bottom:5px}
+  .bar-bg{height:10px;background:#1e2d42;border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+  .bar-fill{height:100%;border-radius:5px;transition:width 0.6s ease;background:linear-gradient(90deg,var(--bc),var(--accent))}
+  .bar-fill.done{background:var(--green)}
+  .bar-pct{font-size:10px;color:var(--txt3);margin-top:3px;text-align:right}
+
+  /* Stat cards */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .stat-label{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+  .stat-val{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;line-height:1.15}
+  .stat-sub{font-size:11px;color:var(--txt3);margin-top:2px}
+  .sep-note{margin-top:10px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:8px;padding:8px 12px;font-size:11px;color:#a5b4fc;text-align:center}
+
+  /* Section toggle headers */
+  .section-toggle{display:flex;align-items:center;gap:6px;padding:10px 4px;cursor:pointer;user-select:none}
+  .section-toggle h2{color:var(--txt)}
+  .toggle-arrow{font-size:9px;color:var(--txt3);transition:transform 0.2s;display:inline-block}
+  .toggle-arrow.open{transform:rotate(90deg)}
+
+  /* Legend */
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .legend-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .legend-dot{width:6px;height:6px;border-radius:3px;flex-shrink:0}
+
+  /* Month header */
+  .month-head{font-size:12px;font-weight:700;color:var(--txt3);padding:12px 4px 6px;border-bottom:2px solid var(--border);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace}
+
+  /* Week card */
+  .week-card{margin-bottom:6px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .week-card.current-week{border-color:#fbbf24;box-shadow:0 0 0 1px #fbbf24}
+  .week-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);cursor:pointer;user-select:none;gap:6px}
+  .week-card.current-week .week-header{background:#1e1900}
+  .week-header-left{display:flex;align-items:center;gap:6px;min-width:0}
+  .week-label{font-weight:600;font-size:13px;white-space:nowrap}
+  .now-badge{font-size:9px;background:#fbbf24;color:#78350f;padding:1px 6px;border-radius:8px;font-weight:700}
+  .type-dots{display:flex;gap:3px}
+  .type-dot{width:6px;height:6px;border-radius:3px}
+  .week-header-right{display:flex;align-items:center;gap:8px;font-size:12px;flex-shrink:0}
+  .week-goal{color:var(--txt3)}
+  .week-actual{color:var(--txt);font-weight:700}
+  .week-diff{font-size:11px;font-weight:700;padding:1px 7px;border-radius:8px}
+  .week-diff.pos{color:#16a34a;background:rgba(22,163,74,0.12)}
+  .week-diff.neg{color:var(--red);background:rgba(239,68,68,0.1)}
+
+  /* Day rows */
+  .day-col-heads{display:flex;align-items:center;padding:4px 12px;font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px;border-top:1px solid var(--border);background:#0e1520;gap:8px}
+  .col-day{width:32px}
+  .col-date{width:44px}
+  .col-type{width:90px;text-align:center}
+  .col-exp{width:58px;text-align:right}
+  .col-act{flex:1;max-width:96px;text-align:center}
+  .col-diff{width:58px;text-align:right}
+  .day-row{display:flex;align-items:center;padding:6px 12px;border-top:1px solid var(--border);gap:8px;background:var(--bg2)}
+  .day-row.today-row{background:#1a1600}
+  .day-row.wknd-row{background:#0e1520}
+  .day-name{width:32px;font-size:11px;font-weight:600;color:var(--txt2)}
+  .day-name.wknd{color:var(--txt3)}
+  .day-date{width:44px;font-size:11px;color:var(--txt3)}
+  .day-type-pill{width:90px;font-size:9px;font-weight:600;padding:3px 0;border-radius:8px;text-align:center;white-space:nowrap;overflow:hidden}
+  .day-exp{width:58px;font-size:11px;color:var(--txt3);text-align:right}
+  .day-act-wrap{flex:1;max-width:96px}
+  .day-act-wrap input{width:100%;padding:3px 6px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;text-align:center;font-family:'DM Mono',monospace;transition:border-color 0.15s,background 0.15s}
+  .day-act-wrap input:focus{border-color:var(--accent);background:#111827}
+  .day-act-wrap input.has-val{border-color:#4ade8055;background:#0d2010}
+  .day-diff-cell{width:58px;font-size:11px;font-weight:600;text-align:right}
+  .week-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#0e1520;border-top:1px solid var(--border);font-size:11px}
+  .fill-btn{background:var(--bcbg);color:var(--bc);border:1px solid #1d4ed8;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px;transition:background 0.15s}
+  .fill-btn:hover{background:#1e3a5f}
+  .all-logged{color:var(--green);font-weight:600}
+
+  /* Expenses */
+  .expenses-box{margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+  .expenses-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .exp-label{font-size:13px;font-weight:700;color:var(--txt2)}
+  .exp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px}
+  .exp-card{text-align:center;padding:8px;border-radius:8px;border:1px solid var(--border)}
+  .exp-card.paid{background:#0d2010;border-color:#166534}
+  .exp-card.upcoming{background:var(--bg3);border-color:var(--border)}
+  .exp-status{font-weight:600;font-size:12px}
+  .exp-date{color:var(--txt3);font-size:11px;margin-top:2px}
+  .exp-amt{font-weight:600;font-size:11px;margin-top:1px}
+
+  /* Paychecks */
+  .pay-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+  .pay-card{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .pay-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
+  .pay-header.received{background:#0d2010}
+  .pay-header.pending{background:#160f2d}
+  .pay-header.upcoming{background:var(--bg3)}
+  .pay-title{font-weight:700;font-size:13px}
+  .pay-desc{font-size:11px;color:var(--txt3);margin-top:1px}
+  .pay-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px}
+  .pay-badge.received{color:#16a34a;background:rgba(22,163,74,0.12)}
+  .pay-badge.pending{color:#a78bfa;background:rgba(139,92,246,0.12)}
+  .pay-badge.upcoming{color:var(--txt3);background:var(--bg)}
+  .pay-gross{font-size:17px;font-weight:800;margin-top:4px;font-family:'Syne',sans-serif}
+  .pay-sources{padding:8px 14px;font-size:12px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px}
+  .pay-alloc-toggle{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;cursor:pointer;user-select:none;background:#0e1520;border-top:1px solid var(--border)}
+  .pay-alloc-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--txt2)}
+  .alloc-status{font-size:11px;font-weight:600}
+  .alloc-body{padding:0 14px 12px;border-top:1px solid var(--border);background:var(--bg2)}
+  .alloc-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;margin-top:8px}
+  .alloc-row input[type=text]{flex:1;min-width:0;padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;font-family:'DM Sans',sans-serif}
+  .alloc-row input[type=text]:focus{border-color:var(--accent)}
+  .alloc-amt-wrap{position:relative;width:90px;flex-shrink:0}
+  .alloc-amt-wrap span{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none}
+  .alloc-amt-wrap input{width:100%;padding:4px 6px 4px 18px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;text-align:right;font-family:'DM Mono',monospace}
+  .alloc-amt-wrap input:focus{border-color:var(--accent)}
+  .del-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s}
+  .del-btn:hover{opacity:1}
+  .alloc-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+  .add-alloc-btn{background:var(--bcbg);color:var(--bc);border:1px solid #1d4ed8;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px}
+  .add-alloc-btn:hover{background:#1e3a5f}
+  .alloc-totals{font-size:12px;text-align:right;color:var(--txt3)}
+
+  /* Cash flow summary */
+  .cashflow{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;margin-top:0}
+  .cf-title{font-weight:700;margin-bottom:8px;color:var(--txt2)}
+  .cf-row{display:flex;justify-content:space-between;margin-bottom:3px}
+  .cf-row.total{font-weight:700;padding-top:6px;border-top:2px solid var(--border);font-size:13px}
+  .cf-row.pending-row{color:#a5b4fc;margin-top:4px}
+  .cf-row.true-total{font-weight:700;color:#a5b4fc}
+
+  /* Reset */
+  .reset-wrap{text-align:center;margin-top:16px;padding-bottom:20px}
+  .reset-btn{font-size:11px;color:var(--txt3);background:none;border:1px solid var(--border);padding:5px 14px;border-radius:6px;cursor:pointer;transition:border-color 0.15s,color 0.15s}
+  .reset-btn:hover{border-color:var(--red);color:var(--red)}
+
+  @media(max-width:520px){
+    .stat-grid{grid-template-columns:1fr 1fr}
+    .stat-val{font-size:18px}
+    .exp-grid{grid-template-columns:repeat(2,1fr)}
+    .col-date,.day-date{display:none}
+    body{padding:10px 8px 40px}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+function dateRange(a, b) {
+  const r = [];
+  let d = new Date(a + "T12:00:00");
+  const e = new Date(b + "T12:00:00");
+  while (d <= e) { r.push(d.toISOString().slice(0, 10)); d = new Date(d); d.setDate(d.getDate() + 1); }
+  return r;
+}
+
+const BC = new Set(["2026-06-15","2026-06-16","2026-06-17","2026-06-22","2026-06-23","2026-06-24","2026-06-25","2026-06-29","2026-06-30","2026-07-01","2026-07-06","2026-07-07","2026-07-08","2026-07-09","2026-07-20","2026-07-21","2026-07-22","2026-07-23","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-08-03","2026-08-04","2026-08-05"]);
+const ML = new Set(["2026-06-03","2026-06-04","2026-06-05","2026-06-08","2026-06-09","2026-06-10","2026-06-11","2026-06-12","2026-06-18","2026-06-19","2026-06-26","2026-07-02","2026-07-17","2026-07-24"]);
+const NW = new Set(dateRange("2026-05-21","2026-06-02"));
+const BP = new Set(dateRange("2026-07-10","2026-07-16"));
+const J4 = new Set(dateRange("2026-07-03","2026-07-05"));
+const BN = new Set(["2026-07-31","2026-08-01","2026-08-02","2026-08-06","2026-08-07"]);
+const EXP_DATES = ["2026-05-07","2026-06-07","2026-07-07","2026-08-07"];
+const DN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
+const START_BAL = 300;
+const DEF_ALLOC = { p0: [{ l:"Car maintenance (dad)", a:250 }, { l:"Gas/emergency fund", a:50 }, { l:"Savings account", a:480 }] };
+const STORAGE_KEY = "owen-savings-2026-v1";
+
+function getInfo(ds) {
+  if (BC.has(ds)) return { t:"bc", l:"Boulder County", e:126.53, cl:"#3b82f6", bg:"#1e3a5f" };
+  if (ML.has(ds)) return { t:"ml", l:"Mobile Lab",    e:107.71, cl:"#22c55e", bg:"#14391f" };
+  if (NW.has(ds)) return { t:"off", l:"Norway",       e:0,      cl:"#64748b", bg:"#1e2a38" };
+  if (BP.has(ds)) return { t:"off", l:"RMNP",         e:0,      cl:"#64748b", bg:"#1e2a38" };
+  if (J4.has(ds)) return { t:"off", l:"4th July",     e:0,      cl:"#64748b", bg:"#1e2a38" };
+  if (BN.has(ds)) return { t:"off", l:"Band Camp",    e:0,      cl:"#64748b", bg:"#1e2a38" };
+  const dow = new Date(ds + "T12:00:00").getDay();
+  if (dow === 0 || dow === 6) return { t:"wk", l:"Weekend", e:0, cl:"#475569", bg:"#141e2e" };
+  return { t:"fr", l:"Freelance", e:50, cl:"#f59e0b", bg:"#3d2e0a" };
+}
+
+function fmt(n) { return "$" + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function fmts(n) { return "$" + Math.abs(Math.round(n)).toLocaleString(); }
+
+// ─── GOOGLE SHEETS SYNC CONFIG ───────────────────────────────────────────────
+// Paste your Apps Script Web App URL here after setup:
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8S3rC7s1SGF0WTyc7KjrLeTNOOWeMUiMVQvF2YNlmzC6D9EuDlBIc9dcwB3iUiAXu/exec";
+const SYNC_ENABLED = SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbw8S3rC7s1SGF0WTyc7KjrLeTNOOWeMUiMVQvF2YNlmzC6D9EuDlBIc9dcwB3iUiAXu/exec";
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let state = { act: {}, ui: {}, alloc: JSON.parse(JSON.stringify(DEF_ALLOC)) };
+let syncStatus = "idle"; // idle | saving | saved | error | loading
+let syncTimeout = null;
+let lastSyncedJSON = null;
+
+function setSyncStatus(s) {
+  syncStatus = s;
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  const map = {
+    idle:    { text: "Sync ready",      color: "var(--txt3)" },
+    loading: { text: "⟳ Loading…",      color: "#fbbf24" },
+    saving:  { text: "⟳ Saving…",       color: "#fbbf24" },
+    saved:   { text: "✓ Synced",         color: "#4ade80" },
+    error:   { text: "⚠ Sync failed – data saved locally", color: "#fb923c" },
+    offline: { text: "Sync not set up", color: "var(--txt3)" },
+  };
+  const info = map[s] || map.idle;
+  el.textContent = info.text;
+  el.style.color = info.color;
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      state.act = d.act || {};
+      state.ui = d.ui || {};
+      state.alloc = d.alloc || JSON.parse(JSON.stringify(DEF_ALLOC));
+    }
+  } catch(e) {}
+}
+
+function saveStateLocal() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// Debounced remote save — waits 1.5s after last change before sending to Sheets
+function saveState() {
+  saveStateLocal();
+  if (!SYNC_ENABLED) return;
+  if (syncTimeout) clearTimeout(syncTimeout);
+  setSyncStatus("saving");
+  syncTimeout = setTimeout(() => pushToSheets(), 1500);
+}
+
+async function pushToSheets() {
+  const payload = JSON.stringify({ act: state.act, alloc: state.alloc });
+  if (payload === lastSyncedJSON) { setSyncStatus("saved"); return; }
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "save", data: payload }),
+    });
+    const json = await res.json();
+    if (json.status === "ok") { lastSyncedJSON = payload; setSyncStatus("saved"); }
+    else { setSyncStatus("error"); }
+  } catch(e) { setSyncStatus("error"); }
+}
+
+async function pullFromSheets() {
+  if (!SYNC_ENABLED) { setSyncStatus("offline"); return; }
+  setSyncStatus("loading");
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=load");
+    const json = await res.json();
+    if (json.status === "ok" && json.data) {
+      const d = JSON.parse(json.data);
+      // Merge: remote wins for act & alloc, keep local ui (scroll/open state)
+      const localUI = state.ui;
+      state.act   = d.act   || {};
+      state.alloc = d.alloc || JSON.parse(JSON.stringify(DEF_ALLOC));
+      state.ui    = localUI;
+      saveStateLocal();
+      lastSyncedJSON = JSON.stringify({ act: state.act, alloc: state.alloc });
+      setSyncStatus("saved");
+    } else {
+      setSyncStatus(json.data === null ? "saved" : "error");
+    }
+  } catch(e) { setSyncStatus("error"); }
+}
+
+// ─── COMPUTED ────────────────────────────────────────────────────────────────
+const allDays = dateRange("2026-04-16","2026-08-31").map(ds => {
+  const d = new Date(ds + "T12:00:00");
+  return { ds, ...getInfo(ds), dow: d.getDay(), mo: d.getMonth(), dy: d.getDate() };
+});
+
+function buildWeeks() {
+  const r = []; let w = [];
+  for (const d of allDays) {
+    if (d.dow === 1 && w.length) { r.push(w); w = []; }
+    w.push(d);
+  }
+  if (w.length) r.push(w);
+  return r;
+}
+const weeks = buildWeeks();
+
+function getToday() { return new Date().toISOString().slice(0,10); }
+
+function computePayPeriods(act, today) {
+  const pds = [
+    { id:"p0", label:"End of April",     desc:"Mar 16 – Apr 15", by:"2026-04-30", fixed:true, gross:780 },
+    { id:"p1", label:"End of May",       desc:"Apr 16 – May 15", by:"2026-05-31", s:"2026-04-16", e:"2026-05-15" },
+    { id:"p2", label:"End of June",      desc:"May 16 – Jun 15", by:"2026-06-30", s:"2026-05-16", e:"2026-06-15" },
+    { id:"p3", label:"End of July",      desc:"Jun 16 – Jul 15", by:"2026-07-31", s:"2026-06-16", e:"2026-07-15" },
+    { id:"p4", label:"End of August",    desc:"Jul 16 – Aug 15", by:"2026-08-31", s:"2026-07-16", e:"2026-08-15" },
+    { id:"p5", label:"End of September", desc:"Aug 16 – Aug 31", by:"2026-09-30", s:"2026-08-16", e:"2026-08-31", pending:true },
+  ];
+  return pds.map(p => {
+    if (p.fixed) {
+      const received = p.by <= today;
+      return { ...p, bcN:0, mlN:0, frN:0, bcA:0, mlA:0, frA:0, net:p.gross, received, actGross: received ? p.gross : 0 };
+    }
+    const days = allDays.filter(d => d.ds >= p.s && d.ds <= p.e);
+    const bc = days.filter(d => d.t === "bc"), ml = days.filter(d => d.t === "ml"), fr = days.filter(d => d.t === "fr");
+    const bcA = bc.length*126.53, mlA = ml.length*107.71, frA = fr.length*50;
+    const gross = bcA + mlA + frA;
+    const actTotal = days.reduce((s,d) => s + (act[d.ds] ?? 0), 0);
+    const unlogged = days.filter(d => act[d.ds] === undefined).reduce((s,d) => s + d.e, 0);
+    const projGross = actTotal + unlogged;
+    const received = p.by <= today;
+    return { ...p, bcN:bc.length, mlN:ml.length, frN:fr.length, bcA, mlA, frA, gross, net:gross, actTotal, projGross, received };
+  });
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function setActual(ds, val) {
+  if (val === "" || val === null || val === undefined) delete state.act[ds];
+  else { const n = parseFloat(val); if (!isNaN(n)) state.act[ds] = n; else delete state.act[ds]; }
+  saveState(); render();
+}
+// Soft update: save locally only while typing (no debounce/re-render, keeps focus)
+function setActualSoft(ds, val) {
+  if (val === "" || val === null || val === undefined) delete state.act[ds];
+  else { const n = parseFloat(val); if (!isNaN(n)) state.act[ds] = n; else delete state.act[ds]; }
+  saveStateLocal();
+}
+function toggle(k) { state.ui[k] = !state.ui[k]; saveState(); render(); }
+function fillWeek(wi) {
+  weeks[wi].forEach(d => { if (d.e > 0 && state.act[d.ds] === undefined) state.act[d.ds] = d.e; });
+  saveState(); render();
+}
+function addAllocItem(pid) {
+  if (!state.alloc[pid]) state.alloc[pid] = [];
+  state.alloc[pid].push({ l:"", a:0 });
+  saveState(); render();
+}
+function updAllocLabel(pid, i, val) { state.alloc[pid][i].l = val; saveState(); }
+function updAllocAmt(pid, i, val) { state.alloc[pid][i].a = parseFloat(val)||0; saveState(); }
+function delAllocItem(pid, i) { state.alloc[pid].splice(i,1); saveState(); render(); }
+function resetAll() { if(confirm("Clear all entered data? This cannot be undone.")) { state.act={}; state.ui={}; state.alloc=JSON.parse(JSON.stringify(DEF_ALLOC)); saveState(); render(); } }
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  const today = getToday();
+  const { act, ui, alloc } = state;
+  const pp = computePayPeriods(act, today);
+
+  const entered = new Set(Object.keys(act));
+  const totalAct = Object.values(act).reduce((s,v) => s+v, 0);
+  const totalExpAll = allDays.reduce((s,d) => s+d.e, 0);
+  const expPaid = EXP_DATES.filter(d => d <= today).length * 240;
+
+  const p0Alloc = alloc.p0 || [];
+  const p0NonSavings = p0Alloc.filter(a => !a.l.toLowerCase().includes("savings")).reduce((s,a) => s+a.a, 0);
+
+  const cashReceived = pp.reduce((s,p) => {
+    if (!p.received) return s;
+    if (p.fixed) return s + p.gross;
+    return s + (p.actTotal || 0);
+  }, 0);
+  const curBal = START_BAL + (pp[0].received ? cashReceived - p0NonSavings : cashReceived) - expPaid;
+
+  const projReceivedByAug = pp.filter(p => !p.pending).reduce((s,p) => {
+    if (p.fixed) return s + p.gross - p0NonSavings;
+    return s + (p.projGross || p.gross);
+  }, 0);
+  const projBalAug31 = START_BAL + projReceivedByAug - 960;
+  const sepPaycheck = pp.find(p => p.pending);
+  const pendingAmt = sepPaycheck ? (sepPaycheck.projGross || sepPaycheck.gross || 0) : 0;
+  const projBalTotal = projBalAug31 + pendingAmt;
+  const surplus = projBalAug31 - 5500;
+  const pct = Math.min(100, Math.max(0, (curBal / 5500) * 100));
+
+  const expForEntered = allDays.filter(d => entered.has(d.ds)).reduce((s,d) => s+d.e, 0);
+  const aheadBehind = totalAct - expForEntered;
+  const isAhead = aheadBehind >= 0;
+  const remainToEarn = Math.max(0, 5680 - totalAct);
+
+  // ── Dashboard ──
+  let paceHtml = entered.size === 0
+    ? `<div class="pace-box neutral"><div style="font-size:13px;color:var(--txt3);font-weight:500">Start logging days to track your progress</div></div>`
+    : `<div class="pace-box ${isAhead?'ahead':'behind'}">
+        <div class="pace-label" style="color:${isAhead?'#86efac':'#fdba74'}">${isAhead?'Ahead of Schedule':'Behind Schedule'}</div>
+        <div class="pace-amt" style="color:${isAhead?'#4ade80':'#fb923c'}">${isAhead?'+':'−'}${fmt(Math.abs(aheadBehind))}</div>
+        <div class="pace-note">vs expected across ${entered.size} logged day${entered.size!==1?'s':''}</div>
+       </div>`;
+
+  // ── Weeks ──
+  let weeksHtml = '';
+  let prevMo = -1;
+  weeks.forEach((wk, wi) => {
+    const wExp = wk.reduce((s,d) => s+d.e, 0);
+    const wAct = wk.reduce((s,d) => s+(act[d.ds]??0), 0);
+    const hasE = wk.some(d => act[d.ds] !== undefined);
+    const allFilled = wk.filter(d => d.e>0).every(d => act[d.ds] !== undefined);
+    const wDiff = wAct - wExp;
+    const isOpen = ui["w"+wi];
+    const f = wk[0], la = wk[wk.length-1];
+    const wLabel = MN[f.mo]+" "+f.dy+(f.mo!==la.mo?" – "+MN[la.mo]+" "+la.dy:" – "+la.dy);
+    const hasToday = wk.some(d => d.ds === today);
+    const earnTypes = [...new Set(wk.filter(d => d.e>0).map(d => d.t))];
+    const frDays = wk.filter(d => d.t==="fr").length;
+
+    if (f.mo !== prevMo) {
+      weeksHtml += `<div class="month-head">${MN[f.mo]} ${f.ds.slice(0,4)}</div>`;
+      prevMo = f.mo;
+    }
+
+    const typeDots = earnTypes.map(t =>
+      `<span class="type-dot" style="background:${t==='bc'?'#3b82f6':t==='ml'?'#22c55e':'#f59e0b'}"></span>`
+    ).join('');
+
+    const diffHtml = hasE ? `
+      <span class="week-actual">${fmt(wAct)}</span>
+      <span class="week-diff ${wDiff>=0?'pos':'neg'}">${wDiff>=0?'+':'−'}${fmt(Math.abs(wDiff))}</span>` : '';
+
+    let rowsHtml = '';
+    if (isOpen) {
+      rowsHtml = `<div class="day-col-heads">
+        <span class="col-day">Day</span><span class="col-date">Date</span>
+        <span class="col-type" style="text-align:center">Type</span>
+        <span class="col-exp">Expected</span><span class="col-act">Actual</span><span class="col-diff">+/−</span>
+      </div>`;
+      wk.forEach(d => {
+        const a = act[d.ds];
+        const has = a !== undefined;
+        const diff = has ? a - d.e : null;
+        const isT = d.ds === today;
+        const diffStr = diff !== null ? `<span style="color:${diff>=0?'#4ade80':'#ef4444'}">${diff>=0?'+':'−'}${fmt(Math.abs(diff))}</span>` : '<span style="color:transparent">.</span>';
+        rowsHtml += `<div class="day-row${isT?' today-row':d.t==='wk'?' wknd-row':''}">
+          <span class="day-name${d.t==='wk'?' wknd':''}">${DN[d.dow]}</span>
+          <span class="day-date">${MN[d.mo]} ${d.dy}</span>
+          <span class="day-type-pill" style="background:${d.bg};color:${d.cl}">${d.l}</span>
+          <span class="day-exp">${d.e>0?fmt(d.e):'—'}</span>
+          <div class="day-act-wrap">
+            <input type="number" inputmode="decimal" step="0.01"
+              placeholder="${d.e>0?d.e.toFixed(0):'0'}"
+              value="${has?a:''}"
+              class="${has?'has-val':''}"
+              oninput="setActualSoft('${d.ds}',this.value)"
+              onblur="setActual('${d.ds}',this.value)"
+              onchange="setActual('${d.ds}',this.value)"/>
+          </div>
+          <span class="day-diff-cell">${diffStr}</span>
+        </div>`;
+      });
+      rowsHtml += `<div class="week-footer">
+        ${!allFilled
+          ? `<button class="fill-btn" onclick="fillWeek(${wi})">Fill expected amounts</button>`
+          : `<span class="all-logged">All earning days logged</span>`}
+        ${frDays>0?`<span style="color:var(--txt3)">Freelance target: $${frDays*50}</span>`:''}
+      </div>`;
+    }
+
+    weeksHtml += `<div class="week-card${hasToday?' current-week':''}">
+      <div class="week-header" onclick="toggle('w${wi}')">
+        <div class="week-header-left">
+          <span class="toggle-arrow${isOpen?' open':''}">&#9654;</span>
+          <span class="week-label">${wLabel}</span>
+          ${hasToday?'<span class="now-badge">NOW</span>':''}
+          <div class="type-dots">${typeDots}</div>
+        </div>
+        <div class="week-header-right">
+          <span class="week-goal">Goal: <b>${fmt(wExp)}</b></span>
+          ${diffHtml}
+        </div>
+      </div>
+      ${rowsHtml}
+    </div>`;
+  });
+
+  // ── Paychecks ──
+  let payHtml = '';
+  if (ui.pay) {
+    let cardsHtml = '';
+    pp.forEach(p => {
+      const status = p.pending ? "pending" : p.received ? "received" : "upcoming";
+      const stLabel = status==="received" ? "Received" : status==="pending" ? "Pending (Sep)" : "Upcoming";
+      const al = alloc[p.id] || [];
+      const isAllocOpen = ui["al_"+p.id];
+
+      // Use projGross (actuals + remaining expected) for non-fixed, non-received paychecks
+      const displayAmt = p.fixed ? p.gross : (p.received ? p.actTotal || p.gross : p.projGross || p.gross);
+      const scheduledAmt = p.fixed ? p.gross : p.gross;
+      const projDelta = (!p.fixed && !p.received && p.projGross !== undefined) ? p.projGross - p.gross : 0;
+      const hasLogged = !p.fixed && !p.received && p.actTotal > 0;
+      const unallocDisp = displayAmt - (al.reduce((s,a) => s+a.a, 0));
+
+      let sourcesHtml = '';
+      if (p.fixed) sourcesHtml = `<span style="color:var(--txt3)">Prior period paycheck</span>`;
+      else {
+        if (p.bcN>0) sourcesHtml += `<span style="color:#3b82f6;font-weight:600">BC: ${p.bcN}d = ${fmt(p.bcA)}</span>`;
+        if (p.mlN>0) sourcesHtml += `<span style="color:#22c55e;font-weight:600">ML: ${p.mlN}d = ${fmt(p.mlA)}</span>`;
+        if (p.frN>0) sourcesHtml += `<span style="color:#f59e0b;font-weight:600">FR: ${p.frN}d = ${fmt(p.frA)}</span>`;
+        if (hasLogged) {
+          const pctLogged = Math.round((p.actTotal/(p.projGross||1))*100);
+          sourcesHtml += `<span style="color:var(--txt3);font-size:11px">${pctLogged}% logged</span>`;
+        }
+      }
+      // Projected delta note (only show if there's actual logged data changing the projection)
+      let projNoteHtml = '';
+      if (!p.fixed && !p.received && hasLogged && Math.abs(projDelta) >= 0.01) {
+        projNoteHtml = `<div style="font-size:11px;padding:5px 14px 6px;border-top:1px solid var(--border);background:#0e1520;color:${projDelta>=0?'#4ade80':'#fb923c'}">
+          ${projDelta>=0?'▲':'▼'} Projected ${projDelta>=0?'above':'below'} schedule by ${fmt(Math.abs(projDelta))}
+          <span style="color:var(--txt3)"> (scheduled: ${fmt(scheduledAmt)})</span>
+        </div>`;
+      }
+
+      let allocRowsHtml = al.length === 0
+        ? `<div style="font-size:12px;color:var(--txt3);padding:8px 0">No allocations yet — add where this paycheck should go.</div>`
+        : al.map((item,i) => `<div class="alloc-row">
+            <input type="text" placeholder="e.g. Savings account" value="${item.l.replace(/"/g,'&quot;')}"
+              onchange="updAllocLabel('${p.id}',${i},this.value)" oninput="updAllocLabel('${p.id}',${i},this.value)"/>
+            <div class="alloc-amt-wrap"><span>$</span>
+              <input type="number" inputmode="decimal" step="0.01" value="${item.a||''}"
+                onchange="updAllocAmt('${p.id}',${i},this.value)" oninput="updAllocAmt('${p.id}',${i},this.value)"/>
+            </div>
+            <button class="del-btn" onclick="delAllocItem('${p.id}',${i})">×</button>
+          </div>`).join('');
+
+      const allocStatusHtml = al.length>0
+        ? `<span class="alloc-status" style="color:${Math.abs(unallocDisp)<0.01?'#16a34a':'#f59e0b'}">
+            ${Math.abs(unallocDisp)<0.01?'Fully allocated':fmt(unallocDisp)+' unallocated'}
+           </span>` : '';
+
+      cardsHtml += `<div class="pay-card">
+        <div class="pay-header ${status}">
+          <div><div class="pay-title">${p.label}</div><div class="pay-desc">Pay period: ${p.desc}</div></div>
+          <div style="text-align:right">
+            <span class="pay-badge ${status}">${stLabel}</span>
+            <div class="pay-gross">${fmt(displayAmt)}</div>
+            ${hasLogged && Math.abs(projDelta)>=0.01 ? `<div style="font-size:10px;color:var(--txt3);margin-top:1px">sched: ${fmt(scheduledAmt)}</div>` : ''}
+          </div>
+        </div>
+        <div class="pay-sources">${sourcesHtml}</div>
+        ${projNoteHtml}
+        <div class="pay-alloc-toggle" onclick="toggle('al_${p.id}')">
+          <div class="pay-alloc-label">
+            <span class="toggle-arrow${isAllocOpen?' open':''}">&#9654;</span>
+            Where this money goes
+          </div>
+          ${allocStatusHtml}
+        </div>
+        ${isAllocOpen ? `<div class="alloc-body">
+          ${allocRowsHtml}
+          <div class="alloc-footer">
+            <button class="add-alloc-btn" onclick="addAllocItem('${p.id}')">+ Add allocation</button>
+            ${al.length>0?`<div class="alloc-totals">
+              Allocated: <b>${fmt(al.reduce((s,a)=>s+a.a,0))}</b>
+              ${Math.abs(unallocDisp)>=0.01?`<span style="color:${unallocDisp>0?'#f59e0b':'#ef4444'};font-weight:700;margin-left:8px">${unallocDisp>0?fmt(unallocDisp)+' left':'−'+fmt(Math.abs(unallocDisp))+' over'}</span>`:''}
+            </div>`:''}
+          </div>
+        </div>` : ''}
+      </div>`;
+    });
+
+    const totalPaysByAug = pp.filter(p=>!p.pending).reduce((s,p)=>s+p.gross,0);
+    cardsHtml += `<div class="cashflow">
+      <div class="cf-title">Cash Flow Summary</div>
+      <div class="cf-row"><span>Starting savings</span><span>${fmt(START_BAL)}</span></div>
+      <div class="cf-row"><span>Total paychecks by Aug 31</span><span>${fmt(totalPaysByAug)}</span></div>
+      <div class="cf-row" style="color:var(--red)"><span>Paycheck deductions</span><span>−${fmt(p0NonSavings)}</span></div>
+      <div class="cf-row" style="color:var(--red)"><span>Monthly expenses (4 × $240)</span><span>−$960</span></div>
+      <div class="cf-row total"><span>Projected in account Aug 31</span><span style="color:var(--green)">${fmts(projBalAug31)}</span></div>
+      <div class="cf-row pending-row"><span>+ Sep paycheck (pending)</span><span>+${fmts(pendingAmt)}</span></div>
+      <div class="cf-row true-total"><span>True total once all paid</span><span>${fmts(projBalTotal)}</span></div>
+    </div>`;
+
+    payHtml = `<div class="pay-list">${cardsHtml}</div>`;
+  }
+
+  // ── Expenses ──
+  const expCardsHtml = EXP_DATES.map(d => {
+    const past = d <= today;
+    const mo = MN[parseInt(d.slice(5,7))-1];
+    return `<div class="exp-card ${past?'paid':'upcoming'}">
+      <div class="exp-status" style="color:${past?'#16a34a':'var(--txt3)'}">${past?'Paid':'Upcoming'}</div>
+      <div class="exp-date">${mo} 7</div>
+      <div class="exp-amt" style="color:${past?'#16a34a':'var(--txt3)'}">$240</div>
+    </div>`;
+  }).join('');
+
+  // ── Full HTML ──
+  document.getElementById('app').innerHTML = `
+    <div class="dash">
+      <div class="dash-header">
+        <div>
+          <h1>Summer 2026 Savings</h1>
+          <div class="dash-sub">Gap Year Fund &bull; Apr 16 – Aug 31</div>
+        </div>
+        <div class="days-logged">Days logged<b class="mono">${entered.size} / ${allDays.length}</b></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:7px 10px;background:rgba(0,0,0,0.25);border-radius:8px;border:1px solid var(--border)">
+        <span id="sync-status" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--txt3)">Sync ready</span>
+        <button onclick="manualSync()" style="font-size:11px;background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);padding:3px 10px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif">↕ Sync now</button>
+      </div>
+      ${paceHtml}
+      <div class="bar-wrap">
+        <div class="bar-labels"><span>Account balance → $5,500</span><span>${fmts(curBal)} now</span></div>
+        <div class="bar-bg"><div class="bar-fill${pct>=100?' done':''}" style="width:${pct}%"></div></div>
+        <div class="bar-pct">${Math.round(pct)}% of primary goal</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Earned</div>
+          <div class="stat-val">${fmts(totalAct)}</div>
+          <div class="stat-sub">of ${fmts(totalExpAll)} planned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Account Balance</div>
+          <div class="stat-val" style="color:${curBal>=5500?'#4ade80':'#fbbf24'}">${fmts(curBal)}</div>
+          <div class="stat-sub">cash in hand today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Projected Aug 31</div>
+          <div class="stat-val" style="color:${projBalAug31>=5500?'#4ade80':'#fbbf24'}">${fmts(projBalAug31)}</div>
+          <div class="stat-sub" style="color:${surplus>=0?'#4ade80':'#f87171'}">${surplus>=0?'+'+fmts(surplus)+' surplus':'−'+fmts(Math.abs(surplus))+' short'}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Still Need to Earn</div>
+          <div class="stat-val">${fmts(remainToEarn)}</div>
+          <div class="stat-sub">to guarantee $5,500</div>
+        </div>
+      </div>
+      ${pendingAmt>0?`<div class="sep-note">+${fmts(pendingAmt)} arriving in September (Aug 16–31 work) → total with pending: <b>${fmts(projBalTotal)}</b></div>`:''}
+    </div>
+
+    <div class="section-toggle" onclick="toggle('pay')">
+      <span class="toggle-arrow${ui.pay?' open':''}">&#9654;</span>
+      <h2>Paycheck Schedule &amp; Allocations</h2>
+    </div>
+    ${payHtml}
+
+    <div class="legend">
+      <span class="legend-pill" style="background:#1e3a5f;color:#3b82f6"><span class="legend-dot" style="background:#3b82f6"></span>Boulder County</span>
+      <span class="legend-pill" style="background:#14391f;color:#22c55e"><span class="legend-dot" style="background:#22c55e"></span>Mobile Lab</span>
+      <span class="legend-pill" style="background:#3d2e0a;color:#f59e0b"><span class="legend-dot" style="background:#f59e0b"></span>Freelance</span>
+      <span class="legend-pill" style="background:#1e2a38;color:#64748b"><span class="legend-dot" style="background:#64748b"></span>Off</span>
+      <span class="legend-pill" style="background:#141e2e;color:#475569"><span class="legend-dot" style="background:#475569"></span>Weekend</span>
+    </div>
+
+    ${weeksHtml}
+
+    <div class="expenses-box">
+      <div class="expenses-header">
+        <span class="exp-label">Monthly Expenses ($240 each)</span>
+        <span style="font-size:12px;color:var(--txt3)">${fmts(expPaid)} of $960 paid</span>
+      </div>
+      <div class="exp-grid">${expCardsHtml}</div>
+    </div>
+
+    <div class="reset-wrap">
+      <button class="reset-btn" onclick="resetAll()">Reset All Data</button>
+    </div>
+  `;
+
+  // Auto-scroll to current week on first load if nothing is open
+  if (!Object.keys(ui).some(k=>k.startsWith('w'))) {
+    const el = document.querySelector('.current-week');
+    if (el) { setTimeout(() => el.scrollIntoView({ behavior:'smooth', block:'center' }), 100); }
+  }
+}
+
+async function manualSync() {
+  await pullFromSheets();
+  render();
+  if (SYNC_ENABLED) pushToSheets();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+loadState();
+const today = getToday();
+const curWeekIdx = weeks.findIndex(wk => wk.some(d => d.ds === today));
+if (curWeekIdx >= 0 && !state.ui["w"+curWeekIdx]) { state.ui["w"+curWeekIdx] = true; }
+render();
+// Pull latest from Sheets on page load, then re-render with fresh data
+if (SYNC_ENABLED) {
+  pullFromSheets().then(() => render());
+} else {
+  setTimeout(() => setSyncStatus("offline"), 50);
+}
+</script>
+</body>
+</html>
