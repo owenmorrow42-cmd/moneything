@@ -165,6 +165,8 @@
     .stat-val{font-size:18px}
     .col-date,.day-date{display:none}
     body{padding:10px 8px 40px}
+    .chart-wrap{padding:10px 10px 8px}
+    canvas{max-height:150px !important}
   }
 </style>
 </head>
@@ -758,105 +760,7 @@ function render(){
       </div>`;
     });
 
-    // Extra payments section
-    const xpOpen=ui.xp;
-    cardsHtml+=`<div style="margin-top:4px">
-      <div class="section-toggle" onclick="toggle('xp')" style="padding:8px 4px">
-        <span class="toggle-arrow${xpOpen?' open':''}">&#9654;</span>
-        <h2 style="font-size:13px;color:var(--txt2)">Extra / Freelance Payments</h2>
-        ${standaloneTotal>0?`<span style="font-size:11px;color:#f59e0b;margin-left:auto">${fmts(standaloneTotal)} standalone</span>`:''}
-      </div>
-      ${xpOpen?`
-      ${(extraPay||[]).map(xp=>{
-        const xpBase=xp.amount||0;
-        const xpAllocNonSav=((xp.alloc||[]).reduce((s,a)=>s+(a.a||0),0));
-        const xpAutoSav=Math.max(0,xpBase-xpAllocNonSav);
-        const xpSavOverride=xp.allocSavings;
-        const xpSav=xpSavOverride!==null&&xpSavOverride!==undefined?xpSavOverride:xpAutoSav;
-        const xpAllocOpen=ui["al_xp_"+xp.id];
-        const xpDiff=xpBase-(xpAllocNonSav+xpSav);
 
-        const xpRowsHtml=(xp.alloc||[]).map((item,i)=>`<div class="alloc-row">
-          <input type="text" placeholder="e.g. Savings" value="${(item.l||'').replace(/"/g,'&quot;')}"
-            onchange="updExtraPayAllocLabel('${xp.id}',${i},this.value)" oninput="updExtraPayAllocLabel('${xp.id}',${i},this.value)"/>
-          <div class="alloc-amt-wrap"><span class="prefix">$</span>
-            <input type="number" inputmode="decimal" step="0.01" value="${item.a||''}"
-              onchange="updExtraPayAllocAmt('${xp.id}',${i},this.value)" oninput="updExtraPayAllocAmt('${xp.id}',${i},this.value)"/>
-          </div>
-          <button class="del-btn" onclick="delExtraPayAlloc('${xp.id}',${i})">×</button>
-        </div>`).join('');
-
-        const xpSavInputVal=xpSavOverride!==null&&xpSavOverride!==undefined?xpSavOverride:'';
-        const xpSavRow=`<div class="alloc-savings-row">
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:12px;color:#4ade80;font-weight:600">→ Savings</span>
-            <span style="font-size:10px;color:var(--txt3)">${xpSavOverride!==null&&xpSavOverride!==undefined?'(manual)':'(auto)'}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div class="alloc-amt-wrap" style="width:100px"><span class="prefix">$</span>
-              <input type="number" inputmode="decimal" step="0.01"
-                placeholder="${xpAutoSav.toFixed(2)}" value="${xpSavInputVal}"
-                style="color:#4ade80;border-color:${xpSavOverride!==null&&xpSavOverride!==undefined?'#4ade8055':'var(--border2)'}"
-                onchange="updExtraPaySavings('${xp.id}',this.value)"
-                oninput="updExtraPaySavingsSoft('${xp.id}',this.value)"
-                onblur="updExtraPaySavings('${xp.id}',this.value)"/>
-            </div>
-            ${xpSavOverride!==null&&xpSavOverride!==undefined?`<button onclick="updExtraPaySavings('${xp.id}','')" style="font-size:9px;padding:1px 5px;border-radius:4px;border:1px solid var(--border2);background:none;color:var(--txt3);cursor:pointer">auto</button>`:''}
-          </div>
-        </div>`;
-
-        return`<div class="extra-pay-card">
-          <div class="extra-pay-header">
-            <span class="xp-badge ${xp.type==='standalone'?'standalone':'topaycheck'}">${xp.type==='standalone'?'Standalone':'→ Paycheck'}</span>
-            <input type="text" placeholder="Label (e.g. Dog walking)" value="${(xp.label||'').replace(/"/g,'&quot;')}"
-              style="flex:1;min-width:0;padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid #3d2e0a;background:#0e1520;color:var(--txt);outline:none"
-              onchange="updExtraPay('${xp.id}','label',this.value)" oninput="updExtraPaySoft('${xp.id}','label',this.value)"/>
-            <button class="del-btn" onclick="delExtraPay('${xp.id}')">×</button>
-          </div>
-          <div style="padding:10px 14px;background:var(--bg2);display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid #3d2e0a">
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:11px;color:var(--txt3)">Date:</span>
-              <input type="date" value="${xp.date||''}"
-                style="padding:3px 6px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none"
-                onchange="updExtraPay('${xp.id}','date',this.value)"/>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:11px;color:var(--txt3)">Amount:</span>
-              <div style="position:relative">
-                <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none">$</span>
-                <input type="number" inputmode="decimal" step="0.01" placeholder="0" value="${xp.amount||''}"
-                  style="width:100px;padding:3px 6px 3px 18px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;font-family:'DM Mono',monospace"
-                  oninput="updExtraPaySoft('${xp.id}','amount',this.value)"
-                  onblur="updExtraPay('${xp.id}','amount',this.value)"
-                  onchange="updExtraPay('${xp.id}','amount',this.value)"/>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:11px;color:var(--txt3)">Type:</span>
-              <select onchange="updExtraPay('${xp.id}','type',this.value)"
-                style="padding:3px 6px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none">
-                <option value="standalone" ${xp.type==='standalone'?'selected':''}>Standalone</option>
-                <option value="topaycheck" ${xp.type==='topaycheck'?'selected':''}>Add to pay period</option>
-              </select>
-            </div>
-          </div>
-          <div class="pay-alloc-toggle" onclick="toggle('al_xp_${xp.id}')">
-            <div class="pay-alloc-label"><span class="toggle-arrow${xpAllocOpen?' open':''}">&#9654;</span>Where this money goes</div>
-            <span class="alloc-status" style="color:${Math.abs(xpDiff)<0.01?'#16a34a':xpDiff<0?'#ef4444':'#f59e0b'}">${Math.abs(xpDiff)<0.01?'Fully allocated':xpDiff>0?fmt(xpDiff)+' unallocated':'−'+fmt(Math.abs(xpDiff))+' over'}</span>
-          </div>
-          ${xpAllocOpen?`<div class="alloc-body">
-            ${xpRowsHtml}
-            <div class="alloc-footer" style="margin-bottom:0">
-              <button class="add-alloc-btn" onclick="addExtraPayAlloc('${xp.id}')">+ Add allocation</button>
-              <div class="alloc-totals">Non-savings: <b>${fmt(xpAllocNonSav)}</b></div>
-            </div>
-            ${xpSavRow}
-          </div>`:''}
-        </div>`;
-      }).join('')}
-      <button class="add-xp-btn" onclick="addExtraPay()">+ Add Extra Payment</button>
-      `:''}
-    </div>`;
 
     const totalPaysByAug=pp.filter(p=>!p.pending).reduce((s,p)=>s+p.gross,0);
     cardsHtml+=`<div class="cashflow" style="margin-top:8px">
@@ -980,6 +884,110 @@ function render(){
     </div>`;
   });
 
+  // ── Extra Payments standalone section ──
+  let xpSectionHtml='';
+  {
+    const xpOpen=ui.xp;
+    const standaloneTotal=(extraPay||[]).filter(x=>x.type==="standalone").reduce((s,x)=>s+(x.amount||0),0);
+    xpSectionHtml=`<div style="margin-bottom:16px">
+      <div class="section-toggle" onclick="toggle('xp')" style="padding:8px 4px">
+        <span class="toggle-arrow${xpOpen?' open':''}">&#9654;</span>
+        <h2 style="font-size:13px;color:var(--txt2)">Extra / Freelance Payments</h2>
+        ${standaloneTotal>0?`<span style="font-size:11px;color:#f59e0b;margin-left:auto">${fmts(standaloneTotal)} standalone</span>`:''}
+      </div>
+      ${xpOpen?`
+      ${(extraPay||[]).map(xp=>{
+        const xpBase=xp.amount||0;
+        const xpAllocNonSav=((xp.alloc||[]).reduce((s,a)=>s+(a.a||0),0));
+        const xpAutoSav=Math.max(0,xpBase-xpAllocNonSav);
+        const xpSavOverride=xp.allocSavings;
+        const xpSav=xpSavOverride!==null&&xpSavOverride!==undefined?xpSavOverride:xpAutoSav;
+        const xpAllocOpen=ui["al_xp_"+xp.id];
+        const xpDiff=xpBase-(xpAllocNonSav+xpSav);
+
+        const xpRowsHtml=(xp.alloc||[]).map((item,i)=>`<div class="alloc-row">
+          <input type="text" placeholder="e.g. Savings" value="${(item.l||'').replace(/"/g,'&quot;')}"
+            onchange="updExtraPayAllocLabel('${xp.id}',${i},this.value)" oninput="updExtraPayAllocLabel('${xp.id}',${i},this.value)"/>
+          <div class="alloc-amt-wrap"><span class="prefix">$</span>
+            <input type="number" inputmode="decimal" step="0.01" value="${item.a||''}"
+              onchange="updExtraPayAllocAmt('${xp.id}',${i},this.value)" oninput="updExtraPayAllocAmt('${xp.id}',${i},this.value)"/>
+          </div>
+          <button class="del-btn" onclick="delExtraPayAlloc('${xp.id}',${i})">×</button>
+        </div>`).join('');
+
+        const xpSavInputVal=xpSavOverride!==null&&xpSavOverride!==undefined?xpSavOverride:'';
+        const xpSavRow=`<div class="alloc-savings-row">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:12px;color:#4ade80;font-weight:600">→ Savings</span>
+            <span style="font-size:10px;color:var(--txt3)">${xpSavOverride!==null&&xpSavOverride!==undefined?'(manual)':'(auto)'}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="alloc-amt-wrap" style="width:100px"><span class="prefix">$</span>
+              <input type="number" inputmode="decimal" step="0.01"
+                placeholder="${xpAutoSav.toFixed(2)}" value="${xpSavInputVal}"
+                style="color:#4ade80;border-color:${xpSavOverride!==null&&xpSavOverride!==undefined?'#4ade8055':'var(--border2)'}"
+                onchange="updExtraPaySavings('${xp.id}',this.value)"
+                oninput="updExtraPaySavingsSoft('${xp.id}',this.value)"
+                onblur="updExtraPaySavings('${xp.id}',this.value)"/>
+            </div>
+            ${xpSavOverride!==null&&xpSavOverride!==undefined?`<button onclick="updExtraPaySavings('${xp.id}','')" style="font-size:9px;padding:1px 5px;border-radius:4px;border:1px solid var(--border2);background:none;color:var(--txt3);cursor:pointer">auto</button>`:''}
+          </div>
+        </div>`;
+
+        return`<div class="extra-pay-card">
+          <div class="extra-pay-header">
+            <span class="xp-badge ${xp.type==='standalone'?'standalone':'topaycheck'}">${xp.type==='standalone'?'Standalone':'→ Paycheck'}</span>
+            <input type="text" placeholder="Label (e.g. Dog walking)" value="${(xp.label||'').replace(/"/g,'&quot;')}"
+              style="flex:1;min-width:0;padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid #3d2e0a;background:#0e1520;color:var(--txt);outline:none"
+              onchange="updExtraPay('${xp.id}','label',this.value)" oninput="updExtraPaySoft('${xp.id}','label',this.value)"/>
+            <button class="del-btn" onclick="delExtraPay('${xp.id}')">×</button>
+          </div>
+          <div style="padding:10px 14px;background:var(--bg2);display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid #3d2e0a">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:var(--txt3)">Date:</span>
+              <input type="date" value="${xp.date||''}"
+                style="padding:3px 6px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none"
+                onchange="updExtraPay('${xp.id}','date',this.value)"/>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:var(--txt3)">Amount:</span>
+              <div style="position:relative">
+                <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none">$</span>
+                <input type="number" inputmode="decimal" step="0.01" placeholder="0" value="${xp.amount||''}"
+                  style="width:100px;padding:3px 6px 3px 18px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;font-family:'DM Mono',monospace"
+                  oninput="updExtraPaySoft('${xp.id}','amount',this.value)"
+                  onblur="updExtraPay('${xp.id}','amount',this.value)"
+                  onchange="updExtraPay('${xp.id}','amount',this.value)"/>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:var(--txt3)">Type:</span>
+              <select onchange="updExtraPay('${xp.id}','type',this.value)"
+                style="padding:3px 6px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none">
+                <option value="standalone" ${xp.type==='standalone'?'selected':''}>Standalone</option>
+                <option value="topaycheck" ${xp.type==='topaycheck'?'selected':''}>Add to pay period</option>
+              </select>
+            </div>
+          </div>
+          <div class="pay-alloc-toggle" onclick="toggle('al_xp_${xp.id}')">
+            <div class="pay-alloc-label"><span class="toggle-arrow${xpAllocOpen?' open':''}">&#9654;</span>Where this money goes</div>
+            <span class="alloc-status" style="color:${Math.abs(xpDiff)<0.01?'#16a34a':xpDiff<0?'#ef4444':'#f59e0b'}">${Math.abs(xpDiff)<0.01?'Fully allocated':xpDiff>0?fmt(xpDiff)+' unallocated':'−'+fmt(Math.abs(xpDiff))+' over'}</span>
+          </div>
+          ${xpAllocOpen?`<div class="alloc-body">
+            ${xpRowsHtml}
+            <div class="alloc-footer" style="margin-bottom:0">
+              <button class="add-alloc-btn" onclick="addExtraPayAlloc('${xp.id}')">+ Add allocation</button>
+              <div class="alloc-totals">Non-savings: <b>${fmt(xpAllocNonSav)}</b></div>
+            </div>
+            ${xpSavRow}
+          </div>`:''}
+        </div>`;
+      }).join('')}
+      <button class="add-xp-btn" onclick="addExtraPay()">+ Add Extra Payment</button>
+      `:''}
+    </div>`;
+  }
+
   // ── Full DOM ──
   document.getElementById('app').innerHTML=`
     <div class="dash">
@@ -1017,7 +1025,7 @@ function render(){
           <div class="chart-legend-item" style="gap:4px"><div style="width:16px;border-top:2px dashed #fbbf24"></div>$5,500</div>
         </div>
       </div>
-      <canvas id="chart-cumulative" height="200"></canvas>
+      <canvas id="chart-cumulative" height="160"></canvas>
     </div>
 
     <!-- Weekly chart — always visible -->
@@ -1030,7 +1038,7 @@ function render(){
           <div class="chart-legend-item"><div style="width:8px;height:8px;border-radius:2px;background:#fb923c"></div>Below</div>
         </div>
       </div>
-      <canvas id="chart-weekly" height="180"></canvas>
+      <canvas id="chart-weekly" height="150"></canvas>
     </div>
 
     <div class="section-toggle" onclick="toggle('pay')">
@@ -1038,6 +1046,7 @@ function render(){
       <h2>Paycheck Schedule &amp; Allocations</h2>
     </div>
     ${payHtml}
+    ${xpSectionHtml}
 
     <div class="legend">
       <span class="legend-pill" style="background:#1e3a5f;color:#3b82f6"><span class="legend-dot" style="background:#3b82f6"></span>Boulder County</span>
@@ -1060,10 +1069,11 @@ function render(){
   `;
 
   // Draw charts
-  requestAnimationFrame(()=>{
+  // Small delay ensures DOM layout is complete before reading canvas dimensions
+  setTimeout(()=>{
     drawCumulativeChart(allDays,act,extraPay,today);
     drawWeeklyChart(weeks,act,xpByDate);
-  });
+  },50);
 
   if(!Object.keys(ui).some(k=>k.startsWith('w'))){
     const el=document.querySelector('.current-week');
@@ -1075,9 +1085,12 @@ function render(){
 function getCtx(id){
   const canvas=document.getElementById(id);if(!canvas)return null;
   const dpr=window.devicePixelRatio||1;
-  const w=canvas.offsetWidth||340;
-  const h=parseInt(canvas.getAttribute('height'))||200;
-  canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.height=h+'px';
+  const h=parseInt(canvas.getAttribute('height'))||160;
+  // Reset width so layout recalculates, then read from parent container
+  canvas.style.width='100%';
+  canvas.style.height=h+'px';
+  const w=canvas.parentElement?canvas.parentElement.clientWidth||canvas.offsetWidth||340:canvas.offsetWidth||340;
+  canvas.width=w*dpr;canvas.height=h*dpr;
   const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx._w=w;ctx._h=h;return ctx;
 }
 
