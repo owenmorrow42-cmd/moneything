@@ -1,1231 +1,689 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Owen's Summer 2026 Savings</title>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Owen · Summer 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;
-    --border:#2a3a52;--border2:#354a66;
-    --bc:#3b82f6;--bcbg:#1e3a5f;
-    --txt:#e2e8f0;--txt2:#94a3b8;--txt3:#64748b;
-    --accent:#6366f1;--red:#ef4444;--green:#22c55e;
-    --radius:12px;
-  }
-  html{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh}
-  body{max-width:860px;margin:0 auto;padding:16px 12px 40px}
-  h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
-  h2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
-  .mono{font-family:'DM Mono',monospace}
-  /* ── Dashboard ── */
-  .dash{background:linear-gradient(135deg,#0d1629 0%,#152040 100%);border:1px solid var(--border2);border-radius:16px;padding:20px 18px;margin-bottom:16px}
-  .dash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-  .dash-sub{font-size:11px;color:var(--txt3);margin-top:3px}
-  .days-logged{text-align:right;font-size:11px;color:var(--txt3)}
-  .days-logged b{display:block;font-size:17px;font-weight:700;color:var(--txt);font-family:'DM Mono',monospace}
-  .pace-box{border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:center}
-  .pace-box.neutral{background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.2)}
-  .pace-box.ahead{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.25)}
-  .pace-box.behind{background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.25)}
-  .pace-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
-  .pace-amt{font-size:34px;font-weight:800;font-family:'Syne',sans-serif;line-height:1}
-  .pace-note{font-size:11px;color:var(--txt3);margin-top:4px}
-  .bar-wrap{margin-bottom:14px}
-  .bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);margin-bottom:5px}
-  .bar-bg{height:10px;background:#1e2d42;border-radius:5px;overflow:hidden;border:1px solid var(--border)}
-  .bar-fill{height:100%;border-radius:5px;transition:width 0.6s ease;background:linear-gradient(90deg,var(--bc),var(--accent))}
-  .bar-fill.done{background:var(--green)}
-  .bar-pct{font-size:10px;color:var(--txt3);margin-top:3px;text-align:right}
-  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .stat-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
-  .stat-label{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
-  .stat-val{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;line-height:1.15}
-  .stat-sub{font-size:11px;color:var(--txt3);margin-top:2px}
-  .sep-note{margin-top:10px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:8px;padding:8px 12px;font-size:11px;color:#a5b4fc;text-align:center}
-  /* ── Section toggles ── */
-  .section-toggle{display:flex;align-items:center;gap:6px;padding:10px 4px;cursor:pointer;user-select:none}
-  .section-toggle h2{color:var(--txt)}
-  .toggle-arrow{font-size:9px;color:var(--txt3);transition:transform 0.2s;display:inline-block}
-  .toggle-arrow.open{transform:rotate(90deg)}
-  /* ── Legend ── */
-  .legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-  .legend-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600}
-  .legend-dot{width:6px;height:6px;border-radius:3px;flex-shrink:0}
-  /* ── Month header ── */
-  .month-head{font-size:12px;font-weight:700;color:var(--txt3);padding:12px 4px 6px;border-bottom:2px solid var(--border);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace}
-  /* ── Week card ── */
-  .week-card{margin-bottom:6px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-  .week-card.current-week{border-color:#fbbf24;box-shadow:0 0 0 1px #fbbf24}
-  .week-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);cursor:pointer;user-select:none;gap:6px}
-  .week-card.current-week .week-header{background:#1e1900}
-  .week-header-left{display:flex;align-items:center;gap:6px;min-width:0}
-  .week-label{font-weight:600;font-size:13px;white-space:nowrap}
-  .now-badge{font-size:9px;background:#fbbf24;color:#78350f;padding:1px 6px;border-radius:8px;font-weight:700}
-  .type-dots{display:flex;gap:3px}
-  .type-dot{width:6px;height:6px;border-radius:3px}
-  .week-header-right{display:flex;align-items:center;gap:8px;font-size:12px;flex-shrink:0}
-  .week-goal{color:var(--txt3)}
-  .week-diff{font-size:11px;font-weight:700;padding:1px 7px;border-radius:8px}
-  .week-diff.pos{color:#16a34a;background:rgba(22,163,74,0.12)}
-  .week-diff.neg{color:var(--red);background:rgba(239,68,68,0.1)}
-  /* ── Day rows ── */
-  .day-col-heads{display:flex;align-items:center;padding:4px 12px;font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px;border-top:1px solid var(--border);background:#0e1520;gap:6px}
-  .col-day{width:28px}.col-date{width:44px}.col-type{width:84px;text-align:center}
-  .col-exp{width:52px;text-align:right}.col-act{flex:1;text-align:center}.col-diff{width:54px;text-align:right}
-  .day-row{display:flex;align-items:center;padding:5px 12px;border-top:1px solid var(--border);gap:6px;background:var(--bg2)}
-  .day-row.today-row{background:#1a1600}
-  .day-row.wknd-row{background:#0d1118}
-  .day-name{width:28px;font-size:11px;font-weight:600;color:var(--txt2)}.day-name.wknd{color:var(--txt3)}
-  .day-date{width:44px;font-size:11px;color:var(--txt3)}
-  .day-type-pill{width:84px;font-size:9px;font-weight:600;padding:2px 0;border-radius:8px;text-align:center;white-space:nowrap;overflow:hidden}
-  .day-exp{width:52px;font-size:11px;color:var(--txt3);text-align:right}
-  .day-act-cell{flex:1;display:flex;align-items:center;gap:3px}
-  .mode-btn{font-size:9px;padding:2px 5px;border-radius:4px;border:1px solid var(--border2);cursor:pointer;white-space:nowrap;flex-shrink:0;line-height:1.5;font-family:'DM Mono',monospace;transition:all 0.15s}
-  .mode-btn.dollar{background:#0e1520;color:var(--txt3)}
-  .mode-btn.hrs{background:#3d2e0a;color:#f59e0b;border-color:#f59e0b55}
-  .day-input{width:100%;padding:3px 5px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;text-align:center;font-family:'DM Mono',monospace}
-  .day-input:focus{border-color:var(--accent);background:#111827}
-  .day-input.has-val{border-color:#4ade8055;background:#0d2010}
-  .day-input.xp-val{border-color:#f59e0b55;background:#1e1600}
-  .day-diff-cell{width:54px;font-size:11px;font-weight:600;text-align:right}
-  .week-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#0e1520;border-top:1px solid var(--border);font-size:11px}
-  .fill-btn{background:var(--bcbg);color:var(--bc);border:1px solid #1d4ed8;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px}
-  .all-logged{color:var(--green);font-weight:600}
-  /* ── Expenses ── */
-  .expenses-box{margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-  .expenses-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg3)}
-  .exp-label{font-size:13px;font-weight:700;color:var(--txt2)}
-  .exp-month-card{border-top:1px solid var(--border);padding:12px 14px;background:var(--bg2)}
-  .exp-month-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .exp-breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px}
-  .exp-breakdown-row.total-row{border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-weight:700;font-size:13px}
-  .exp-extra-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
-  .exp-input{padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;font-family:'DM Mono',monospace}
-  .exp-input:focus{border-color:var(--accent)}
-  /* ── Paychecks ── */
-  .pay-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-  .pay-card{border:1px solid var(--border);border-radius:10px;overflow:hidden}
-  .pay-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
-  .pay-header.received{background:#0d2010}.pay-header.pending{background:#160f2d}.pay-header.upcoming{background:var(--bg3)}
-  .pay-title{font-weight:700;font-size:13px}.pay-desc{font-size:11px;color:var(--txt3);margin-top:1px}
-  .pay-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px}
-  .pay-badge.received{color:#16a34a;background:rgba(22,163,74,0.12)}
-  .pay-badge.pending{color:#a78bfa;background:rgba(139,92,246,0.12)}
-  .pay-badge.upcoming{color:var(--txt3);background:var(--bg)}
-  .pay-gross{font-size:17px;font-weight:800;margin-top:4px;font-family:'Syne',sans-serif}
-  .pay-sources{padding:8px 14px;font-size:12px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px}
-  .pay-received-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--border);background:#080d14}
-  .pay-alloc-toggle{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;cursor:pointer;user-select:none;background:#0e1520;border-top:1px solid var(--border)}
-  .pay-alloc-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--txt2)}
-  .alloc-status{font-size:11px;font-weight:600}
-  .alloc-body{padding:0 14px 12px;border-top:1px solid var(--border);background:var(--bg2)}
-  .alloc-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;margin-top:8px}
-  .alloc-row input[type=text]{flex:1;min-width:0;padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;font-family:'DM Sans',sans-serif}
-  .alloc-row input[type=text]:focus{border-color:var(--accent)}
-  .alloc-amt-wrap{position:relative;width:90px;flex-shrink:0}
-  .alloc-amt-wrap .prefix{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none}
-  .alloc-amt-wrap input{width:100%;padding:4px 6px 4px 18px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;text-align:right;font-family:'DM Mono',monospace}
-  .alloc-amt-wrap input:focus{border-color:var(--accent)}
-  .alloc-savings-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px;border-top:1px dashed var(--border);margin-top:6px}
-  .del-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;opacity:0.7}
-  .del-btn:hover{opacity:1}
-  .alloc-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
-  .add-alloc-btn{background:var(--bcbg);color:var(--bc);border:1px solid #1d4ed8;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px}
-  .alloc-totals{font-size:12px;text-align:right;color:var(--txt3)}
-  /* ── Extra payments ── */
-  .extra-pay-card{border:1px solid #3d2e0a;border-radius:10px;overflow:hidden;margin-bottom:8px}
-  .extra-pay-header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1e1600}
-  .xp-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap}
-  .xp-badge.standalone{background:rgba(245,158,11,0.15);color:#f59e0b}
-  .xp-badge.topaycheck{background:rgba(99,102,241,0.15);color:#a5b4fc}
-  .add-xp-btn{background:#1e1600;color:#f59e0b;border:1px solid #3d2e0a;padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;width:100%;margin-top:4px}
-  /* ── Cash flow ── */
-  .cashflow{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px}
-  .cf-title{font-weight:700;margin-bottom:8px;color:var(--txt2)}
-  .cf-row{display:flex;justify-content:space-between;margin-bottom:3px}
-  .cf-row.total{font-weight:700;padding-top:6px;border-top:2px solid var(--border);font-size:13px}
-  .cf-row.pending-row{color:#a5b4fc;margin-top:4px}
-  .cf-row.true-total{font-weight:700;color:#a5b4fc}
-  /* ── Charts ── */
-  .chart-wrap{background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:14px 14px 10px;margin-bottom:16px}
-  .chart-title{font-size:12px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-  .chart-legend{display:flex;gap:12px;flex-wrap:wrap}
-  .chart-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--txt3)}
-  .chart-legend-line{width:16px;height:2px;border-radius:1px}
-  canvas{display:block;width:100%;border-radius:6px}
-  /* ── Reset ── */
-  .reset-wrap{text-align:center;margin-top:16px;padding-bottom:20px}
-  .reset-btn{font-size:11px;color:var(--txt3);background:none;border:1px solid var(--border);padding:5px 14px;border-radius:6px;cursor:pointer}
-  .reset-btn:hover{border-color:var(--red);color:var(--red)}
-  @media(max-width:520px){
-    .stat-grid{grid-template-columns:1fr 1fr}
-    .stat-val{font-size:18px}
-    .col-date,.day-date{display:none}
-    body{padding:10px 8px 40px}
-    .chart-wrap{padding:10px 10px 8px}
-    canvas{max-height:150px !important}
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--bd:#2a3a52;--bd2:#354a66;--bc:#3b82f6;--bcbg:#1e3a5f;--tx:#e2e8f0;--tx2:#94a3b8;--tx3:#64748b;--ac:#6366f1;--red:#ef4444;--grn:#22c55e;--r:12px}
+html{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh}
+body{max-width:860px;margin:0 auto;padding:0 0 60px}
+.sync-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:rgba(0,0,0,.4);border-bottom:1px solid var(--bd);font-size:11px}
+.sync-btn{font-size:11px;background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);padding:2px 10px;border-radius:6px;cursor:pointer}
+.tab-bar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--bd2);display:flex;padding:0 12px}
+.tab-btn{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;padding:13px 22px;border:none;background:none;color:var(--tx3);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab-btn.active{color:var(--tx);border-bottom-color:var(--ac)}
+.tab-con{padding:14px 12px}
+.dash{background:linear-gradient(135deg,#0d1629,#152040);border:1px solid var(--bd2);border-radius:16px;padding:18px;margin-bottom:16px}
+.dash-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.dash-sub{font-size:11px;color:var(--tx3);margin-top:3px}
+.dc{text-align:right;font-size:11px;color:var(--tx3)}
+.dc b{display:block;font-size:17px;font-weight:700;color:var(--tx);font-family:'DM Mono',monospace}
+.pace-wrap{position:relative;margin-bottom:14px}
+.pace-box{border-radius:12px;padding:12px 16px;text-align:center}
+.pace-box.neu{background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2)}
+.pace-box.ahd{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25)}
+.pace-box.bhd{background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.25)}
+.p-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.p-amt{font-size:30px;font-weight:800;font-family:'Syne',sans-serif;line-height:1}
+.p-note{font-size:11px;color:var(--tx3);margin-top:4px}
+.p-sel{position:absolute;top:8px;right:8px}
+.p-sel select{font-size:10px;padding:2px 6px;border-radius:6px;border:1px solid var(--bd2);background:rgba(0,0,0,.4);color:var(--tx2);outline:none;cursor:pointer}
+.bar-wrap{margin-bottom:14px}
+.bar-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);margin-bottom:5px}
+.bar-bg{height:14px;background:#1e2d42;border-radius:7px;overflow:hidden;border:1px solid var(--bd);position:relative}
+.bar-fill{height:100%;border-radius:7px;transition:width .6s;position:absolute;left:0;top:0}
+.bar-hints{display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:3px;flex-wrap:wrap;gap:4px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sc{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.sc-l{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.sc-v{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;line-height:1.15}
+.sc-s{font-size:11px;color:var(--tx3);margin-top:2px}
+.sep-note{margin-top:10px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:8px;padding:8px 12px;font-size:11px;color:#a5b4fc;text-align:center}
+.sec-hd{display:flex;align-items:center;gap:6px;padding:10px 4px;cursor:pointer;user-select:none;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--tx)}
+.arr{font-size:9px;color:var(--tx3);transition:transform .2s;display:inline-block}
+.arr.o{transform:rotate(90deg)}
+.cw{background:var(--bg3);border:1px solid var(--bd2);border-radius:14px;padding:14px 14px 10px;margin-bottom:16px}
+.ct{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.cl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.cl-i{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--tx3)}
+.chart-sel{font-size:10px;padding:2px 6px;border-radius:6px;border:1px solid var(--bd2);background:rgba(0,0,0,.4);color:var(--tx2);outline:none;cursor:pointer}
+canvas{display:block;width:100%;border-radius:6px}
+.leg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.lp{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600}
+.ld{width:6px;height:6px;border-radius:3px;flex-shrink:0}
+.mo-hd{font-size:12px;font-weight:700;color:var(--tx3);padding:12px 4px 6px;border-bottom:2px solid var(--bd);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace}
+.wk{margin-bottom:6px;border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.wk.now{border-color:#fbbf24;box-shadow:0 0 0 1px #fbbf24}
+.wk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);cursor:pointer;user-select:none;gap:6px}
+.wk.now .wk-hd{background:#1e1900}
+.wk-hl{display:flex;align-items:center;gap:6px;min-width:0}
+.wk-n{font-weight:600;font-size:13px;white-space:nowrap}
+.now-b{font-size:9px;background:#fbbf24;color:#78350f;padding:1px 6px;border-radius:8px;font-weight:700}
+.tdots{display:flex;gap:3px}
+.tdot{width:6px;height:6px;border-radius:3px}
+.wk-hr{display:flex;align-items:center;gap:8px;font-size:12px;flex-shrink:0}
+.wk-goal{color:var(--tx3)}
+.wk-diff{font-size:11px;font-weight:700;padding:1px 7px;border-radius:8px}
+.wk-diff.pos{color:#16a34a;background:rgba(22,163,74,.12)}
+.wk-diff.neg{color:var(--red);background:rgba(239,68,68,.1)}
+.dcols{display:flex;align-items:center;padding:4px 12px;font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;border-top:1px solid var(--bd);background:#0e1520;gap:6px}
+.cd{width:28px}.cdt{width:44px}.ct2{width:84px;text-align:center}.ce{width:52px;text-align:right}.ca{flex:1;text-align:center}.cdi{width:54px;text-align:right}
+.drow{display:flex;align-items:center;padding:5px 12px;border-top:1px solid var(--bd);gap:6px;background:var(--bg2);flex-wrap:wrap}
+.drow.td{background:#1a1600}.drow.wk2{background:#0d1118}
+.dn{width:28px;font-size:11px;font-weight:600;color:var(--tx2)}.dn.w{color:var(--tx3)}
+.ddt{width:44px;font-size:11px;color:var(--tx3)}
+.dtyp{width:84px;font-size:9px;font-weight:600;padding:2px 0;border-radius:8px;text-align:center;white-space:nowrap;overflow:hidden}
+.dexp{width:52px;font-size:11px;color:var(--tx3);text-align:right}
+.dact{flex:1;display:flex;align-items:center;gap:3px}
+.mdb{font-size:9px;padding:2px 5px;border-radius:4px;border:1px solid var(--bd2);cursor:pointer;white-space:nowrap;flex-shrink:0;line-height:1.5;font-family:'DM Mono',monospace;transition:all .15s}
+.mdb.dol{background:#0e1520;color:var(--tx3)}.mdb.hrs{background:#3d2e0a;color:#f59e0b;border-color:#f59e0b55}
+.dinp{width:100%;padding:3px 5px;font-size:12px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none;text-align:center;font-family:'DM Mono',monospace}
+.dinp:focus{border-color:var(--ac);background:#111827}
+.dinp.hv{border-color:#4ade8055;background:#0d2010}
+.dlbl{width:100%;padding:3px 8px;font-size:11px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--tx3);outline:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.dlbl:focus{border-color:var(--bd2);background:#111827;color:var(--tx)}
+.dlbl.hl{border-color:var(--bd);background:#111827;color:var(--tx2)}
+.ddif{width:54px;font-size:11px;font-weight:600;text-align:right}
+.wk-ft{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#0e1520;border-top:1px solid var(--bd);font-size:11px}
+.fill-btn{background:var(--bcbg);color:var(--bc);border:1px solid #1d4ed8;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px}
+.ald{color:var(--grn);font-weight:600}
+.fr-zone{background:#0d1118;border-top:2px solid #3d2e0a}
+.fr-hd{padding:8px 12px;font-size:10px;color:#f59e0b;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.fr-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 12px;border-top:1px solid #3d2e0a}
+.fr-add{display:block;width:100%;text-align:center;padding:8px;font-size:11px;color:#f59e0b;background:rgba(245,158,11,.06);border:1px dashed #f59e0b44;cursor:pointer;font-weight:600}
+.fr-add:hover{background:rgba(245,158,11,.12)}
+.ti{padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none;font-family:'DM Sans',sans-serif}
+.ti:focus{border-color:var(--ac)}
+.nw{position:relative}.nw .pre{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--tx3);pointer-events:none}
+.ni{padding:4px 6px 4px 18px;font-size:12px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none;text-align:right;font-family:'DM Mono',monospace}
+.ni:focus{border-color:var(--ac)}
+.di{padding:3px 6px;font-size:11px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none}
+.di:focus{border-color:var(--ac)}
+.di.pend{border-color:#92400e;background:#1c1200}
+.di.rcvd{border-color:#166534;background:#0d2010}
+.pay-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.pay-card{border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.pay-hd{display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
+.pay-hd.rc{background:#0d2010}.pay-hd.pe{background:#160f2d}.pay-hd.up{background:var(--bg3)}
+.pay-ti{font-weight:700;font-size:13px}.pay-de{font-size:11px;color:var(--tx3);margin-top:1px}
+.pay-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px}
+.pay-badge.rc{color:#16a34a;background:rgba(22,163,74,.12)}.pay-badge.pe{color:#a78bfa;background:rgba(139,92,246,.12)}.pay-badge.up{color:var(--tx3);background:var(--bg)}
+.pay-gr{font-size:17px;font-weight:800;margin-top:4px;font-family:'Syne',sans-serif}
+.pay-src{padding:8px 14px;font-size:12px;border-top:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:8px}
+.pay-rv{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--bd);background:#080d14}
+.al-tog{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;cursor:pointer;user-select:none;background:#0e1520;border-top:1px solid var(--bd)}
+.al-lbl{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--tx2)}
+.al-st{font-size:11px;font-weight:600}
+.al-body{padding:0 14px 12px;border-top:1px solid var(--bd);background:var(--bg2)}
+.al-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;margin-top:8px}
+.al-row input[type=text]{flex:1;min-width:0;padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none}
+.al-row input[type=text]:focus{border-color:var(--ac)}
+.aw{position:relative;width:90px;flex-shrink:0}
+.aw .pre{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--tx3);pointer-events:none}
+.aw input{width:100%;padding:4px 6px 4px 18px;font-size:12px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none;text-align:right;font-family:'DM Mono',monospace}
+.aw input:focus{border-color:var(--ac)}
+.sv-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px;border-top:1px dashed var(--bd);margin-top:6px}
+.del{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;opacity:.7}
+.del:hover{opacity:1}
+.al-foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.add-al{background:var(--bcbg);color:var(--bc);border:1px solid #1d4ed8;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px}
+.dep-card{border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:8px}
+.dep-hd{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg3)}
+.dep-body{padding:12px 14px;border-top:1px solid var(--bd);background:var(--bg2)}
+.dep-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dep-f{display:flex;flex-direction:column;gap:4px}
+.dep-fl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.dep-i{padding:5px 8px;font-size:12px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none;width:100%;font-family:'DM Mono',monospace}
+.dep-i:focus{border-color:var(--ac)}
+.dep-i.sn{border-color:#4ade8055;background:#0d2010;color:#4ade80}
+.add-dep{width:100%;text-align:center;padding:10px;font-size:12px;color:#4ade80;background:rgba(74,222,128,.06);border:1px dashed rgba(74,222,128,.3);cursor:pointer;border-radius:8px;font-weight:600;margin-bottom:8px}
+.add-dep:hover{background:rgba(74,222,128,.12)}
+.bday-sec{margin-bottom:16px;border:1px solid #1e3a5f;border-radius:var(--r);overflow:hidden}
+.bday-hd{padding:12px 14px;background:linear-gradient(135deg,#0d1f3c,#1e3a5f);display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.bday-card{border-top:1px solid #1e3a5f;padding:12px 14px;background:var(--bg2);display:flex;align-items:flex-start;gap:12px}
+.bday-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--bd2);background:#0e1520;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.bday-chk.on{background:#16a34a;border-color:#16a34a}
+.bday-con{flex:1;min-width:0}
+.exp-box{margin-bottom:16px;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.exp-bh{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg3)}
+.exp-mo{border-top:1px solid var(--bd);padding:14px;background:var(--bg2)}
+.exp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.exp-row.grn{color:#4ade80}
+.exp-row.sh{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;padding:10px 0 4px;border-bottom:none}
+.exp-ed{position:relative;width:90px}
+.exp-ed .pre{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--tx3);pointer-events:none}
+.exp-ed input{width:100%;padding:4px 6px 4px 18px;font-size:13px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none;text-align:right;font-family:'DM Mono',monospace;font-weight:600}
+.exp-ed input:focus{border-color:var(--ac)}
+.fun-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px;border-top:2px solid var(--bd)}
+.cashflow{background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:14px;font-size:12px;margin-top:8px}
+.cfr{display:flex;justify-content:space-between;margin-bottom:3px}
+.cfr.tot{font-weight:700;padding-top:6px;border-top:2px solid var(--bd);font-size:13px}
+.cfr.pe{color:#a5b4fc;margin-top:4px}
+.cfr.tr{font-weight:700;color:#a5b4fc}
+.rst{text-align:center;margin-top:16px}
+.rst-btn{font-size:11px;color:var(--tx3);background:none;border:1px solid var(--bd);padding:5px 14px;border-radius:6px;cursor:pointer}
+.rst-btn:hover{border-color:var(--red);color:var(--red)}
+@media(max-width:520px){.sg{grid-template-columns:1fr 1fr}.sc-v{font-size:18px}.cdt,.ddt{display:none}.dep-g{grid-template-columns:1fr}canvas{max-height:150px!important}.tab-btn{font-size:12px;padding:10px 14px}}
 </style>
 </head>
-<body>
-<div id="app"></div>
+<body><div id="app"></div>
 <script>
-// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+// ── CONSTANTS ──────────────────────────────────────────────────────────
 function dateRange(a,b){const r=[];let d=new Date(a+"T12:00:00");const e=new Date(b+"T12:00:00");while(d<=e){r.push(d.toISOString().slice(0,10));d=new Date(d);d.setDate(d.getDate()+1);}return r;}
-
 const BC=new Set(["2026-06-15","2026-06-16","2026-06-17","2026-06-22","2026-06-23","2026-06-24","2026-06-25","2026-06-29","2026-06-30","2026-07-01","2026-07-06","2026-07-07","2026-07-08","2026-07-09","2026-07-20","2026-07-21","2026-07-22","2026-07-23","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-08-03","2026-08-04","2026-08-05"]);
 const ML=new Set(["2026-06-03","2026-06-04","2026-06-05","2026-06-08","2026-06-09","2026-06-10","2026-06-11","2026-06-12","2026-06-18","2026-06-19","2026-06-26","2026-07-02","2026-07-17","2026-07-24"]);
 const NW=new Set(dateRange("2026-05-21","2026-06-02"));
 const BP=new Set(dateRange("2026-07-10","2026-07-16"));
 const J4=new Set(dateRange("2026-07-03","2026-07-05"));
 const BN=new Set(["2026-07-31","2026-08-01","2026-08-02","2026-08-06","2026-08-07"]);
-
-// Pay rates — verified:
-// BC: $16.87/hr × 7.5hrs = $126.525 ≈ $126.53/day
-// ML: $16.57/hr × 6.5hrs = $107.705 ≈ $107.71/day
-const BC_RATE=16.87, BC_HRS=7.5, BC_DAILY=126.53;
-const ML_RATE=16.57, ML_HRS=6.5, ML_DAILY=107.71;
-const FR_DAILY=50;
-
-const BASE_EXP_DATES=["2026-05-07","2026-06-07","2026-07-07","2026-08-07"];
-// Monthly expense breakdown (net $240 out-of-pocket):
-// $370 total outgoing: $197 insurance + $75 gas (default) + $30 emergency + remainder fun
-// $130 received monthly (car payment contribution) → net = $240
-const EXP_NET=240;
-const EXP_INSURANCE=197, EXP_GAS_DEFAULT=75, EXP_EMERGENCY=30;
-
-const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
-const START_BAL=300;
-const DEF_ALLOC={
-  p0:[{l:"Car maintenance (dad)",a:250},{l:"Gas/emergency fund",a:50},{l:"Savings account",a:480,isSavings:true}]
-};
-const STORAGE_KEY="owen-savings-2026-v4";
+const BC_RATE=16.87,BC_DAILY=126.53,ML_RATE=16.57,ML_DAILY=107.71,FR_RATE=16.57,FR_DAILY=50;
+const EXP_DATES=["2026-05-07","2026-06-07","2026-07-07","2026-08-07"];
+const EXP_TOT=370,EXP_RCV=130,EXP_INS=197,EXP_GAS=60,EXP_EMG=30;
+const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
+const START=300,GMIN=5500,GTGT=6000,GHIGH=6500,GCAM=8500;
+const KEY="owen-2026-v10";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbw8S3rC7s1SGF0WTyc7KjrLeTNOOWeMUiMVQvF2YNlmzC6D9EuDlBIc9dcwB3iUiAXu/exec";
+const SYNC_ON=SCRIPT_URL!=="YOUR_SCRIPT_URL_HERE";
+const BDAY=[{id:"bg0",label:"Turn 17 years old",amount:250},{id:"bg1",label:"Save $5,000",amount:250},{id:"bg2",label:"Make a researched gap year plan",amount:250},{id:"bg3",label:"Lock in my first flight",amount:250}];
 
 function getInfo(ds){
-  if(BC.has(ds))  return{t:"bc", l:"Boulder County",e:BC_DAILY,cl:"#3b82f6",bg:"#1e3a5f"};
-  if(ML.has(ds))  return{t:"ml", l:"Mobile Lab",    e:ML_DAILY,cl:"#22c55e",bg:"#14391f"};
-  if(NW.has(ds))  return{t:"off",l:"Norway",         e:0,       cl:"#64748b",bg:"#1e2a38"};
-  if(BP.has(ds))  return{t:"off",l:"RMNP",           e:0,       cl:"#64748b",bg:"#1e2a38"};
-  if(J4.has(ds))  return{t:"off",l:"4th July",       e:0,       cl:"#64748b",bg:"#1e2a38"};
-  if(BN.has(ds))  return{t:"off",l:"Band Camp",      e:0,       cl:"#64748b",bg:"#1e2a38"};
+  if(BC.has(ds))return{t:"bc",l:"Boulder County",e:BC_DAILY,cl:"#3b82f6",bg:"#1e3a5f"};
+  if(ML.has(ds))return{t:"ml",l:"Mobile Lab",e:ML_DAILY,cl:"#22c55e",bg:"#14391f"};
+  if(NW.has(ds))return{t:"off",l:"Norway",e:0,cl:"#64748b",bg:"#1e2a38"};
+  if(BP.has(ds))return{t:"off",l:"RMNP",e:0,cl:"#64748b",bg:"#1e2a38"};
+  if(J4.has(ds))return{t:"off",l:"4th July",e:0,cl:"#64748b",bg:"#1e2a38"};
+  if(BN.has(ds))return{t:"off",l:"Band Camp",e:0,cl:"#64748b",bg:"#1e2a38"};
   const dow=new Date(ds+"T12:00:00").getDay();
-  if(dow===0||dow===6) return{t:"wk",l:"Weekend",    e:0,       cl:"#475569",bg:"#141e2e"};
+  if(dow===0||dow===6)return{t:"wk",l:"Weekend",e:0,cl:"#475569",bg:"#141e2e"};
   return{t:"fr",l:"Freelance",e:FR_DAILY,cl:"#f59e0b",bg:"#3d2e0a"};
 }
-function fmt(n){return"$"+Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
-function fmts(n){return"$"+Math.abs(Math.round(n)).toLocaleString();}
+// Get the hourly rate for any day
+function getRate(ds){if(BC.has(ds))return BC_RATE;if(ML.has(ds))return ML_RATE;return FR_RATE;}
 
-// ─── SYNC ────────────────────────────────────────────────────────────────────
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbw8S3rC7s1SGF0WTyc7KjrLeTNOOWeMUiMVQvF2YNlmzC6D9EuDlBIc9dcwB3iUiAXu/exec";
-const SYNC_ENABLED=SCRIPT_URL!=="YOUR_SCRIPT_URL_HERE";
-let syncTimeout=null,lastSyncedJSON=null;
+function fmt(n){return(n<0?"−$":"$")+Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
+function fmts(n){return(n<0?"−$":"$")+Math.abs(Math.round(n)).toLocaleString();}
+function today(){return new Date().toISOString().slice(0,10);}
 
-function setSyncStatus(s){
-  const el=document.getElementById('sync-status');if(!el)return;
-  const map={
-    idle:{text:"Sync ready",color:"var(--txt3)"},
-    loading:{text:"⟳ Loading…",color:"#fbbf24"},
-    saving:{text:"⟳ Saving…",color:"#fbbf24"},
-    saved:{text:"✓ Synced",color:"#4ade80"},
-    error:{text:"⚠ Sync failed – saved locally",color:"#fb923c"},
-    offline:{text:"Sync not set up",color:"var(--txt3)"},
-  };
-  const i=map[s]||map.idle;el.textContent=i.text;el.style.color=i.color;
-}
-
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let state={
-  act:{},       // {ds: dollars stored} — always stored as $, converted for display
-  actMode:{},   // {ds: '$'|'bc_hrs'|'ml_hrs'}
-  actLabel:{},  // {ds: note string}
-  alloc:{},     // {pid: [{l,a,isSavings?}]}
-  allocSavings:{}, // {pid: override savings amount or null}
-  payActual:{}, // {pid: actual received dollars}
-  expExtra:{},  // {monthKey: [{l,a}]}
-  expGas:{},    // {monthKey: gas amount override}
-  extraPay:[],  // [{id,date,label,amount,type,alloc:[],allocSavings:null}]
-  ui:{}
-};
-
-function loadState(){
-  try{
-    const raw=localStorage.getItem(STORAGE_KEY);
-    if(raw){const d=JSON.parse(raw);Object.assign(state,d);
-      // ensure new keys exist
-      if(!state.allocSavings)state.allocSavings={};
-      if(!state.expGas)state.expGas={};
-      if(!state.actLabel)state.actLabel={};
-    }
-  }catch(e){}
-}
-function saveStateLocal(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
-function saveState(){saveStateLocal();if(!SYNC_ENABLED)return;if(syncTimeout)clearTimeout(syncTimeout);setSyncStatus("saving");syncTimeout=setTimeout(()=>pushToSheets(),1500);}
-async function pushToSheets(){
-  const payload=JSON.stringify(state);
-  if(payload===lastSyncedJSON){setSyncStatus("saved");return;}
-  try{await fetch(SCRIPT_URL+"?action=save&data="+encodeURIComponent(payload),{mode:"no-cors"});lastSyncedJSON=payload;setSyncStatus("saved");}
-  catch(e){setSyncStatus("error");}
-}
-async function pullFromSheets(){
-  if(!SYNC_ENABLED){setSyncStatus("offline");return;}
-  setSyncStatus("loading");
-  return new Promise(resolve=>{
-    const cb="syncCb_"+Date.now();const sc=document.createElement("script");
-    const t=setTimeout(()=>{delete window[cb];sc.remove();setSyncStatus("error");resolve();},8000);
-    window[cb]=json=>{
-      clearTimeout(t);delete window[cb];sc.remove();
-      try{
-        if(json.status==="ok"&&json.data){
-          const d=JSON.parse(json.data),localUI=state.ui;
-          Object.assign(state,d);state.ui=localUI;
-          if(!state.allocSavings)state.allocSavings={};
-          if(!state.expGas)state.expGas={};
-          if(!state.actLabel)state.actLabel={};
-          saveStateLocal();lastSyncedJSON=JSON.stringify(state);setSyncStatus("saved");
-        }else setSyncStatus(json.data===null?"saved":"error");
-      }catch(e){setSyncStatus("error");}
-      resolve();
-    };
-    sc.src=SCRIPT_URL+"?action=load&callback="+cb;document.head.appendChild(sc);
-  });
-}
-
-// ─── COMPUTED ────────────────────────────────────────────────────────────────
-const allDays=dateRange("2026-04-16","2026-08-31").map(ds=>{
-  const d=new Date(ds+"T12:00:00");
-  return{ds,...getInfo(ds),dow:d.getDay(),mo:d.getMonth(),dy:d.getDate()};
-});
+const allDays=dateRange("2026-04-16","2026-08-31").map(ds=>{const d=new Date(ds+"T12:00:00");return{ds,...getInfo(ds),dow:d.getDay(),mo:d.getMonth(),dy:d.getDate()};});
 function buildWeeks(){const r=[];let w=[];for(const d of allDays){if(d.dow===1&&w.length){r.push(w);w=[];}w.push(d);}if(w.length)r.push(w);return r;}
 const weeks=buildWeeks();
-function getToday(){return new Date().toISOString().slice(0,10);}
 
-// Build a map of standalone extra pay by date for quick lookup
-function buildExtraPayByDate(extraPay){
-  const m={};
-  (extraPay||[]).filter(x=>x.type==="standalone").forEach(x=>{
-    if(!m[x.date])m[x.date]=0;
-    m[x.date]+=(x.amount||0);
-  });
-  return m;
+// ── DEBOUNCE ───────────────────────────────────────────────────────────
+let _rt=null;
+function schedRender(delay){if(_rt)clearTimeout(_rt);_rt=setTimeout(render,delay||700);}
+
+// ── SYNC ───────────────────────────────────────────────────────────────
+let stmr=null,lsync=null;
+function setSS(s){const el=document.getElementById("ss");if(!el)return;const m={idle:{t:"Sync ready",c:"var(--tx3)"},loading:{t:"⟳ Loading…",c:"#fbbf24"},saving:{t:"⟳ Saving…",c:"#fbbf24"},saved:{t:"✓ Synced",c:"#4ade80"},error:{t:"⚠ Sync failed",c:"#fb923c"},offline:{t:"Sync not set up",c:"var(--tx3)"}};const i=m[s]||m.idle;el.textContent=i.t;el.style.color=i.c;}
+async function pushSheets(){const p=JSON.stringify(state);if(p===lsync){setSS("saved");return;}try{await fetch(SCRIPT_URL+"?action=save&data="+encodeURIComponent(p),{mode:"no-cors"});lsync=p;setSS("saved");}catch(e){setSS("error");}}
+async function pullSheets(){if(!SYNC_ON){setSS("offline");return;}setSS("loading");return new Promise(res=>{const cb="sc_"+Date.now();const sc=document.createElement("script");const t=setTimeout(()=>{delete window[cb];sc.remove();setSS("error");res();},8000);window[cb]=json=>{clearTimeout(t);delete window[cb];sc.remove();try{if(json.status==="ok"&&json.data){const d=JSON.parse(json.data),lu=state.ui;Object.assign(state,d);state.ui={...d.ui,...lu};ensureState();saveLocal();lsync=JSON.stringify(state);setSS("saved");}else setSS("error");}catch(e){setSS("error");}res();};sc.src=SCRIPT_URL+"?action=load&callback="+cb;document.head.appendChild(sc);});}
+async function manualSync(){await pullSheets();render();if(SYNC_ON)pushSheets();}
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let state={act:{},actMode:{},actLabel:{},alloc:{},allocSav:{},payActual:{},expOv:{},expEx:{},weekFr:{},deps:[],bdayChk:{},bdayAlloc:{},bdaySav:{},ui:{tab:"earn",pace:"schedule",earnChart:"work",manChart:"deps"}};
+function ensureState(){['actMode','actLabel','alloc','allocSav','payActual','expOv','expEx','bdayChk','bdayAlloc','bdaySav','weekFr'].forEach(k=>{if(!state[k])state[k]={};});if(!Array.isArray(state.deps))state.deps=[];if(!state.ui)state.ui={};if(!state.ui.tab)state.ui.tab="earn";if(!state.ui.pace)state.ui.pace="schedule";if(!state.ui.earnChart)state.ui.earnChart="work";if(!state.ui.manChart)state.ui.manChart="deps";}
+function loadState(){try{const r=localStorage.getItem(KEY);if(r)Object.assign(state,JSON.parse(r));}catch(e){}ensureState();}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function saveState(){saveLocal();if(!SYNC_ON)return;if(stmr)clearTimeout(stmr);setSS("saving");stmr=setTimeout(pushSheets,1500);}
+
+// ── COMPUTED ───────────────────────────────────────────────────────────
+function getEV(mk){const o=state.expOv[mk]||{};const tot=o.total??EXP_TOT,ins=o.ins??EXP_INS,gas=o.gas??EXP_GAS,emg=o.emg??EXP_EMG;return{tot,ins,gas,emg,fun:tot-ins-gas-emg,net:tot-EXP_RCV};}
+function totalExpenses(){return EXP_DATES.reduce((s,d)=>{const ev=getEV(d.slice(0,7));return s+ev.net+((state.expEx[d.slice(0,7)]||[]).reduce((a,e)=>a+(e.a||0),0));},0);}
+function compPP(td){
+  const pds=[{id:"p0",label:"End of April",desc:"Mar 16 – Apr 15",by:"2026-04-30",fixed:true,gross:780},{id:"p1",label:"End of May",desc:"Apr 16 – May 15",by:"2026-05-31",s:"2026-04-16",e:"2026-05-15"},{id:"p2",label:"End of June",desc:"May 16 – Jun 15",by:"2026-06-30",s:"2026-05-16",e:"2026-06-15"},{id:"p3",label:"End of July",desc:"Jun 16 – Jul 15",by:"2026-07-31",s:"2026-06-16",e:"2026-07-15"},{id:"p4",label:"End of Aug",desc:"Jul 16 – Aug 15",by:"2026-08-31",s:"2026-07-16",e:"2026-08-15"},{id:"p5",label:"End of Sep",desc:"Aug 16 – Aug 31",by:"2026-09-30",s:"2026-08-16",e:"2026-08-31",pending:true}];
+  return pds.map(p=>{const rcvd=p.by<=td;if(p.fixed)return{...p,bcN:0,mlN:0,frN:0,bcA:0,mlA:0,frA:0,actTotal:0,projGross:780,rcvd};const days=allDays.filter(d=>d.ds>=p.s&&d.ds<=p.e);const bc=days.filter(d=>d.t==="bc"),ml=days.filter(d=>d.t==="ml"),fr=days.filter(d=>d.t==="fr");const bcA=bc.length*BC_DAILY,mlA=ml.length*ML_DAILY,frA=fr.length*FR_DAILY,gross=bcA+mlA+frA;const actTotal=days.reduce((s,d)=>s+(state.act[d.ds]??0),0);const proj=actTotal+days.filter(d=>state.act[d.ds]===undefined).reduce((s,d)=>s+d.e,0);return{...p,bcN:bc.length,mlN:ml.length,frN:fr.length,bcA,mlA,frA,gross,actTotal,projGross:proj,rcvd};});
+}
+function buildExpDedByPid(pp){const r={};EXP_DATES.forEach(d=>{const mk=d.slice(0,7);const extras=(state.expEx[mk]||[]).filter(e=>e.a>0);if(!extras.length)return;const sorted=pp.filter(p=>!p.pending).sort((a,b)=>a.by<b.by?-1:1);let prev=null;for(const p of sorted){if(p.by<d)prev=p;else break;}if(!prev)return;if(!r[prev.id])r[prev.id]=[];extras.forEach(e=>r[prev.id].push({l:e.l||'Extra expense',a:e.a}));});return r;}
+function wkFrByDate(){const m={};Object.values(state.weekFr||{}).forEach(entries=>(entries||[]).forEach(e=>{const wd=e.workDate||'';if(!wd)return;m[wd]=(m[wd]||0)+(e.amount||0);}));return m;}
+function wkFrTotal(){return Object.values(state.weekFr||{}).reduce((s,arr)=>s+(arr||[]).reduce((ss,e)=>ss+(e.amount||0),0),0);}
+// Birthday goal money received by a date
+function bdayEarned(td){return BDAY.reduce((s,g)=>{const chk=state.bdayChk[g.id];if(!chk)return s;const pd=chk.payDate||'';return pd&&pd<=td?s+g.amount:s;},0);}
+function trueSavBal(upTo){return START+(state.deps||[]).filter(dep=>dep.dateSent&&dep.dateSent<=(upTo||'9999')).reduce((s,dep)=>s+(dep.amtSav||0),0);}
+// Deposit amounts keyed by dateSent — treated as earned income in Making Money tab
+function depsEarnedByDate(){const m={};(state.deps||[]).filter(d=>d.dateRcvd&&d.amtRcvd>0).forEach(d=>{m[d.dateRcvd]=(m[d.dateRcvd]||0)+(d.amtRcvd||0);});return m;}
+// Birthday goal amounts keyed by payDate — for per-date chart plotting
+function bdayByDate(){const m={};BDAY.forEach(g=>{const chk=state.bdayChk[g.id];if(!chk||!chk.payDate)return;m[chk.payDate]=(m[chk.payDate]||0)+g.amount;});return m;}
+// Deposit cumulative line data for charts
+function depsCumLine(){
+  const plotDays=dateRange("2026-04-16","2026-08-31");const td2=today();
+  const depMap={};(state.deps||[]).filter(d=>d.dateSent&&d.amtSav>0).sort((a,b)=>a.dateSent<b.dateSent?-1:1).forEach(d=>{depMap[d.dateSent]=(depMap[d.dateSent]||0)+(d.amtSav||0);});
+  let cum=START;const line=[];
+  plotDays.forEach(ds=>{if(depMap[ds])cum+=depMap[ds];line.push(ds<=td2?cum:null);});
+  return line;
+}
+// Compute all earnings totals
+function computeEarnTotals(td){
+  const frByDate=wkFrByDate();const frTot=wkFrTotal();const bdayE=bdayEarned(td);
+  const depByDate=depsEarnedByDate();
+  const depTot=(state.deps||[]).filter(d=>d.dateRcvd&&d.dateRcvd<=td&&d.amtRcvd>0).reduce((s,d)=>s+(d.amtRcvd||0),0);
+  const totActDays=Object.values(state.act).reduce((s,v)=>s+v,0);
+  const totalEarned=totActDays+frTot+bdayE+depTot;
+  // Deposits on dates within planning range count as "entered" days
+  const depDatesInRange=Object.keys(depByDate).filter(k=>k>='2026-04-16'&&k<='2026-08-31');
+  const entered=new Set([...Object.keys(state.act),...Object.keys(frByDate).filter(k=>frByDate[k]>0),...depDatesInRange]);
+  const expFor=allDays.filter(d=>entered.has(d.ds)).reduce((s,d)=>s+d.e,0);
+  const actFor=allDays.filter(d=>entered.has(d.ds)).reduce((s,d)=>s+(state.act[d.ds]||0)+(frByDate[d.ds]||0)+(depByDate[d.ds]||0),0)+bdayE;
+  const aheadBehind=actFor-expFor;
+  return{frByDate,frTot,bdayE,depByDate,depTot,totActDays,totalEarned,entered,aheadBehind};
 }
 
-function computePayPeriods(act,extraPay,today){
-  const pds=[
-    {id:"p0",label:"End of April",  desc:"Mar 16 – Apr 15",by:"2026-04-30",fixed:true,gross:780},
-    {id:"p1",label:"End of May",    desc:"Apr 16 – May 15",by:"2026-05-31",s:"2026-04-16",e:"2026-05-15"},
-    {id:"p2",label:"End of June",   desc:"May 16 – Jun 15",by:"2026-06-30",s:"2026-05-16",e:"2026-06-15"},
-    {id:"p3",label:"End of July",   desc:"Jun 16 – Jul 15",by:"2026-07-31",s:"2026-06-16",e:"2026-07-15"},
-    {id:"p4",label:"End of August", desc:"Jul 16 – Aug 15",by:"2026-08-31",s:"2026-07-16",e:"2026-08-15"},
-    {id:"p5",label:"End of Sep",    desc:"Aug 16 – Aug 31",by:"2026-09-30",s:"2026-08-16",e:"2026-08-31",pending:true},
-  ];
-  return pds.map(p=>{
-    if(p.fixed){const received=p.by<=today;return{...p,bcN:0,mlN:0,frN:0,bcA:0,mlA:0,frA:0,gross:780,received,actTotal:0,extraBonus:0,projGross:780};}
-    const days=allDays.filter(d=>d.ds>=p.s&&d.ds<=p.e);
-    const bc=days.filter(d=>d.t==="bc"),ml=days.filter(d=>d.t==="ml"),fr=days.filter(d=>d.t==="fr");
-    const bcA=bc.length*BC_DAILY,mlA=ml.length*ML_DAILY,frA=fr.length*FR_DAILY;
-    const gross=bcA+mlA+frA;
-    const actTotal=days.reduce((s,d)=>s+(act[d.ds]??0),0);
-    const unlogged=days.filter(d=>act[d.ds]===undefined).reduce((s,d)=>s+d.e,0);
-    const extraBonus=(extraPay||[]).filter(x=>x.type==="topaycheck"&&x.date>=p.s&&x.date<=p.e).reduce((s,x)=>s+(x.amount||0),0);
-    const projGross=actTotal+unlogged+extraBonus;
-    const received=p.by<=today;
-    return{...p,bcN:bc.length,mlN:ml.length,frN:fr.length,bcA,mlA,frA,gross,actTotal,projGross,received,extraBonus};
-  });
+// ── ACTIONS ────────────────────────────────────────────────────────────
+function setTab(t){state.ui.tab=t;saveState();render();}
+function tog(k){state.ui[k]=!state.ui[k];saveState();render();}
+function setPace(v){state.ui.pace=v;saveState();render();}
+function setEarnChart(v){state.ui.earnChart=v;saveState();render();}
+function setManChart(v){state.ui.manChart=v;saveState();render();}
+
+// Universal hours mode — uses getRate(ds) for all day types
+function cycleMode(ds){const cur=state.actMode[ds]||'$';state.actMode[ds]=cur==='$'?'hrs':'$';delete state.act[ds];saveState();render();}
+function setAct(ds,val,soft){
+  const mode=state.actMode[ds]||'$';const rate=getRate(ds);
+  if(val===''||val===null){delete state.act[ds];}
+  else{const n=parseFloat(val);if(!isNaN(n)){state.act[ds]=mode==='hrs'?+(n*rate).toFixed(2):n;}else delete state.act[ds];}
+  if(soft)saveLocal();else{saveState();schedRender();}
+}
+function setLbl(ds,val,soft){if(!val||!val.trim())delete state.actLabel[ds];else state.actLabel[ds]=val;if(soft)saveLocal();else{saveState();schedRender();}}
+function fillWk(wi){weeks[wi].forEach(d=>{if(d.e>0&&state.act[d.ds]===undefined)state.act[d.ds]=d.e;});saveState();render();}
+function addWkFr(wKey){if(!state.weekFr[wKey])state.weekFr[wKey]=[];const td=today();state.weekFr[wKey].push({id:"wf_"+Date.now(),label:"",amount:0,workDate:td,payDate:td});saveState();render();}
+function updWkFr(wKey,id,field,val,soft){const e=(state.weekFr[wKey]||[]).find(x=>x.id===id);if(!e)return;if(field==='amount'){const n=parseFloat(val);e.amount=isNaN(n)?0:n;}else e[field]=val;if(soft)saveLocal();else{saveState();schedRender();}}
+function delWkFr(wKey,id){if(state.weekFr[wKey])state.weekFr[wKey]=state.weekFr[wKey].filter(x=>x.id!==id);saveState();render();}
+function addDep(){const td=today();state.deps.push({id:"dep_"+Date.now(),source:"",amtRcvd:0,dateRcvd:td,amtSav:0,dateSent:"",note:""});saveState();render();}
+function updDep(id,field,val,soft){const d=(state.deps||[]).find(x=>x.id===id);if(!d)return;if(field==='amtRcvd'||field==='amtSav'){const n=parseFloat(val);d[field]=isNaN(n)?0:n;}else d[field]=val;if(soft)saveLocal();else{saveState();schedRender();}}
+function delDep(id){state.deps=(state.deps||[]).filter(x=>x.id!==id);saveState();render();}
+function addAl(pid){if(!state.alloc[pid])state.alloc[pid]=[];state.alloc[pid].push({l:"",a:0});saveState();render();}
+function updAlL(pid,i,val,soft){if(state.alloc[pid])state.alloc[pid][i].l=val;if(soft)saveLocal();else saveState();}
+function updAlA(pid,i,val,soft){if(state.alloc[pid])state.alloc[pid][i].a=parseFloat(val)||0;if(soft)saveLocal();else{saveState();schedRender();}}
+function delAl(pid,i){if(state.alloc[pid])state.alloc[pid].splice(i,1);saveState();render();}
+function updAlSav(pid,val,soft){const n=parseFloat(val);state.allocSav[pid]=(val===''||isNaN(n))?null:n;if(soft)saveLocal();else{saveState();schedRender();}}
+function setPayAct(pid,val,soft){const n=parseFloat(val);if(val===''||isNaN(n))delete state.payActual[pid];else state.payActual[pid]=n;if(soft)saveLocal();else{saveState();schedRender();}}
+function setExpF(mk,field,val,soft){if(!state.expOv[mk])state.expOv[mk]={};const n=parseFloat(val);if(val===''||isNaN(n))delete state.expOv[mk][field];else state.expOv[mk][field]=n;if(soft)saveLocal();else{saveState();schedRender();}}
+function addExpEx(mk){if(!state.expEx[mk])state.expEx[mk]=[];state.expEx[mk].push({l:"",a:0});saveState();render();}
+function updExpExL(mk,i,val,soft){state.expEx[mk][i].l=val;if(soft)saveLocal();else saveState();}
+function updExpExA(mk,i,val,soft){state.expEx[mk][i].a=parseFloat(val)||0;if(soft)saveLocal();else{saveState();schedRender();}}
+function delExpEx(mk,i){state.expEx[mk].splice(i,1);saveState();render();}
+function togBday(id){if(state.bdayChk[id])delete state.bdayChk[id];else state.bdayChk[id]={workDate:today(),payDate:today()};saveState();render();}
+function updBdayD(id,field,val){if(!state.bdayChk[id])return;state.bdayChk[id][field]=val;saveState();render();}
+function addBdayAl(id){if(!state.bdayAlloc[id])state.bdayAlloc[id]=[];state.bdayAlloc[id].push({l:"",a:0});saveState();render();}
+function updBdayAlL(id,i,val,soft){if(state.bdayAlloc[id])state.bdayAlloc[id][i].l=val;if(soft)saveLocal();else saveState();}
+function updBdayAlA(id,i,val,soft){if(state.bdayAlloc[id])state.bdayAlloc[id][i].a=parseFloat(val)||0;if(soft)saveLocal();else{saveState();schedRender();}}
+function delBdayAl(id,i){if(state.bdayAlloc[id])state.bdayAlloc[id].splice(i,1);saveState();render();}
+function updBdaySav(id,val,soft){const n=parseFloat(val);state.bdaySav[id]=(val===''||isNaN(n))?null:n;if(soft)saveLocal();else{saveState();schedRender();}}
+function resetAll(){if(confirm("Clear all data? Cannot be undone.")){state={act:{},actMode:{},actLabel:{},alloc:{},allocSav:{},payActual:{},expOv:{},expEx:{},weekFr:{},deps:[],bdayChk:{},bdayAlloc:{},bdaySav:{},ui:{tab:"earn",pace:"schedule",earnChart:"work",manChart:"deps"}};saveState();render();}}
+
+// ── ALLOC BLOCK ────────────────────────────────────────────────────────
+function allocBlock(id,amap,smap,base,addFn,lFn,aFn,dFn,sFn,expDeds){
+  const al=amap[id]||[];const isOpen=state.ui["al_"+id];
+  const ded=(expDeds||[]).reduce((s,e)=>s+(e.a||0),0);const nonSav=al.reduce((s,a)=>s+(a.a||0),0);
+  const ov=smap[id];const auto=Math.max(0,base-nonSav-ded);const sav=ov!=null?ov:auto;
+  const diff=base-(nonSav+sav+ded);const sc=Math.abs(diff)<.01?'#16a34a':diff<0?'var(--red)':'#f59e0b';
+  const st=Math.abs(diff)<.01?'Fully allocated':diff>0?fmt(diff)+' unallocated':'−'+fmt(Math.abs(diff))+' over';
+  const rows=al.map((item,i)=>`<div class="al-row"><input type="text" placeholder="e.g. Gas fund" value="${(item.l||'').replace(/"/g,'&quot;')}" oninput="${lFn}('${id}',${i},this.value,true)" onblur="${lFn}('${id}',${i},this.value,false)"/><div class="aw"><span class="pre">$</span><input type="number" inputmode="decimal" step=".01" value="${item.a||''}" oninput="${aFn}('${id}',${i},this.value,true)" onblur="${aFn}('${id}',${i},this.value,false)"/></div><button class="del" onclick="${dFn}('${id}',${i})">×</button></div>`).join('');
+  const dedHtml=expDeds&&expDeds.length?`<div style="margin:6px 0;padding:8px;background:#1a0a0a;border-radius:8px;border:1px solid #7f1d1d"><div style="font-size:10px;color:#f87171;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;font-weight:700">⬇ Expenses from this check</div>${expDeds.map(e=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0"><span style="color:#fca5a5">${e.l}</span><span style="color:#f87171">−${fmt(e.a)}</span></div>`).join('')}</div>`:'';
+  const savRow=`<div class="sv-row"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#4ade80;font-weight:600">→ Savings</span><span style="font-size:10px;color:var(--tx3)">${ov!=null?'(manual)':'(auto)'}</span></div><div style="display:flex;align-items:center;gap:6px"><div class="aw" style="width:100px"><span class="pre">$</span><input type="number" inputmode="decimal" step=".01" placeholder="${auto.toFixed(2)}" value="${ov!=null?ov:''}" style="color:#4ade80;border-color:${ov!=null?'#4ade8055':'var(--bd2)'}" oninput="${sFn}('${id}',this.value,true)" onblur="${sFn}('${id}',this.value,false)"/></div>${ov!=null?`<button onclick="${sFn}('${id}','',false)" style="font-size:9px;padding:1px 5px;border-radius:4px;border:1px solid var(--bd2);background:none;color:var(--tx3);cursor:pointer">auto</button>`:''}</div></div>`;
+  return`<div class="al-tog" onclick="tog('al_${id}')"><div class="al-lbl"><span class="arr${isOpen?' o':''}">&#9654;</span>Where this money goes</div><span class="al-st" style="color:${sc}">${st}</span></div>${isOpen?`<div class="al-body">${rows}<div class="al-foot"><button class="add-al" onclick="${addFn}('${id}')">+ Add allocation</button><div style="font-size:12px;color:var(--tx3)">Non-sav: <b>${fmt(nonSav)}</b></div></div>${dedHtml}${savRow}</div>`:''}`;
 }
 
-function monthTotalExp(mk){
-  const gas=(state.expGas||{})[mk]??EXP_GAS_DEFAULT;
-  const extras=((state.expExtra||{})[mk]||[]).reduce((s,e)=>s+(e.a||0),0);
-  // Total outgoing = insurance + gas + emergency + extras
-  // Net = total outgoing - $130 received = shown as $240 base + extras
-  return EXP_NET+extras; // EXP_NET=240 already accounts for the $130 offset
+// ── SHARED PACE BOX ────────────────────────────────────────────────────
+function mkPaceHtml(ab,entered,frByDate,showSel){
+  const isAhd=ab>=0;const pv=state.ui.pace||'schedule';const td2=today();
+  const todayEarned=(state.act[td2]||0)+(frByDate[td2]||0),todayGoal=getInfo(td2).e||FR_DAILY;
+  const cw=weeks.find(wk=>wk.some(d=>d.ds===td2))||[];const wdSoFar=cw.filter(d=>d.ds<=td2);
+  const wkAct=wdSoFar.reduce((s,d)=>s+(state.act[d.ds]||0)+(frByDate[d.ds]||0),0);const wkExp=wdSoFar.reduce((s,d)=>s+d.e,0);
+  const curMo=td2.slice(0,7);const moDays=allDays.filter(d=>d.ds.slice(0,7)===curMo&&d.ds<=td2);
+  const moAct=moDays.reduce((s,d)=>s+(state.act[d.ds]||0)+(frByDate[d.ds]||0),0);const moExp=moDays.reduce((s,d)=>s+d.e,0);
+  function mkP(amt,lbl,note,hasData){if(!hasData)return`<div class="pace-box neu"><div style="font-size:12px;color:var(--tx3)">${note} — log some days first</div></div>`;const pos=amt>=0;return`<div class="pace-box ${pos?'ahd':'bhd'}"><div class="p-lbl" style="color:${pos?'#86efac':'#fdba74'}">${lbl}</div><div class="p-amt" style="color:${pos?'#4ade80':'#fb923c'}">${pos?'+':'−'}${fmt(Math.abs(amt))}</div><div class="p-note">${note}</div></div>`;}
+  let pb;if(pv==='schedule')pb=mkP(ab,isAhd?'Ahead of Schedule':'Behind Schedule',`vs expected · ${entered.size} days logged`,entered.size>0);else if(pv==='today')pb=mkP(todayEarned-todayGoal,'Today vs Goal',`${fmt(todayEarned)} vs ${fmt(todayGoal)} goal`,todayEarned>0);else if(pv==='week')pb=mkP(wkAct-wkExp,'This Week So Far','vs expected for days so far',wkAct>0);else if(pv==='month')pb=mkP(moAct-moExp,'This Month So Far',`${MN[parseInt(td2.slice(5,7))-1]} vs expected`,moAct>0);else pb=mkP(ab,'Overall vs Schedule',`All ${entered.size} logged days vs expected`,entered.size>0);
+  const sel=showSel?`<div class="p-sel"><select onchange="setPace(this.value)">${[['schedule','vs Schedule'],['today','Today'],['week','This Week'],['month','This Month'],['total','Total']].map(([v,l])=>`<option value="${v}"${pv===v?' selected':''}>${l}</option>`).join('')}</select></div>`:'';
+  return`<div class="pace-wrap">${pb}${sel}</div>`;
 }
 
-// Compute auto savings for an allocation set given a base amount
-function computeAutoSavings(pid,alloc,baseAmt,allocSavingsOverride){
-  const al=(alloc[pid]||[]).filter(a=>!a.isSavings);
-  const nonSavingsTotal=al.reduce((s,a)=>s+(a.a||0),0);
-  const override=(allocSavingsOverride||{})[pid];
-  if(override!==undefined&&override!==null) return override;
-  return Math.max(0,baseAmt-nonSavingsTotal);
-}
+// ── RENDER: MAKING MONEY TAB ───────────────────────────────────────────
+function renderEarn(td,pp,totExp){
+  const {frByDate,frTot,bdayE,totActDays,totalEarned,entered,aheadBehind}=computeEarnTotals(td);
+  const totExpAll=allDays.reduce((s,d)=>s+d.e,0);
+  const p0al=state.alloc.p0||[];const p0non=p0al.reduce((s,a)=>s+(a.a||0),0);
+  // Making money bar: treat all logged earnings as immediately in progress (no paycheck lag)
+  const expPaidSoFar=EXP_DATES.filter(d=>d<=td).reduce((s,d)=>{const ev=getEV(d.slice(0,7));return s+ev.net+((state.expEx[d.slice(0,7)]||[]).reduce((a,e)=>a+(e.a||0),0));},0);
+  const earnBarVal=START+totalEarned-expPaidSoFar; // treat all earned as received
+  const pct=Math.min(100,Math.max(0,(earnBarVal/GCAM)*100));
+  const pctTo6k=Math.min(100,Math.round((earnBarVal/GTGT)*100));
+  const minPct=(GMIN/GCAM)*100,tPct=(GTGT/GCAM)*100,hPct=(GHIGH/GCAM)*100;
+  // Projected final balance (with paycheck timing intact)
+  const projByAug=pp.filter(p=>!p.pending).reduce((s,p)=>{const act=state.payActual[p.id]??null;if(p.fixed)return s+(act!=null?act:p.gross)-p0non;return s+(act!=null?act:p.projGross||p.gross);},0)+frTot+bdayE;
+  const projBal=START+projByAug-totExp;
+  const sepPP=pp.find(p=>p.pending);const pendAmt=sepPP?(sepPP.projGross||sepPP.gross||0):0;
+  // Still need to earn → camera goal: based only on what's actually been earned, not projected
+  const stillNeedCam=Math.max(0,GCAM-(START+totalEarned));
 
-// ─── ACTIONS ─────────────────────────────────────────────────────────────────
-function setActual(ds,val){
-  const mode=(state.actMode||{})[ds]||'$';
-  if(val===""||val===null){delete state.act[ds];}
-  else{const n=parseFloat(val);if(!isNaN(n)){
-    if(mode==='bc_hrs') state.act[ds]=parseFloat((n*BC_RATE).toFixed(2));
-    else if(mode==='ml_hrs') state.act[ds]=parseFloat((n*ML_RATE).toFixed(2));
-    else state.act[ds]=n;
-  }else delete state.act[ds];}
-  saveState();render();
-}
-function setActualSoft(ds,val){
-  const mode=(state.actMode||{})[ds]||'$';
-  if(val===""||val===null){delete state.act[ds];}
-  else{const n=parseFloat(val);if(!isNaN(n)){
-    if(mode==='bc_hrs') state.act[ds]=parseFloat((n*BC_RATE).toFixed(2));
-    else if(mode==='ml_hrs') state.act[ds]=parseFloat((n*ML_RATE).toFixed(2));
-    else state.act[ds]=n;
-  }else delete state.act[ds];}
-  saveStateLocal();
-}
-function setActualLabel(ds,val){
-  state.actLabel=state.actLabel||{};
-  if(!val||val.trim()==='') delete state.actLabel[ds];
-  else state.actLabel[ds]=val.trim();
-  saveState();
-}
-function setActualLabelSoft(ds,val){
-  state.actLabel=state.actLabel||{};
-  if(!val||val.trim()==='') delete state.actLabel[ds];
-  else state.actLabel[ds]=val;
-  saveStateLocal();
-}
-function cycleMode(ds,dayType){
-  state.actMode=state.actMode||{};
-  const cur=state.actMode[ds]||'$';
-  if(dayType==='bc') state.actMode[ds]=cur==='$'?'bc_hrs':'$';
-  else state.actMode[ds]=cur==='$'?'ml_hrs':'$'; // ml and fr and wk all use ml_hrs
-  delete state.act[ds];
-  saveState();render();
-}
-function toggle(k){state.ui[k]=!state.ui[k];saveState();render();}
-function fillWeek(wi){weeks[wi].forEach(d=>{if(d.e>0&&state.act[d.ds]===undefined)state.act[d.ds]=d.e;});saveState();render();}
-
-// Paycheck allocs
-function addAllocItem(pid){if(!state.alloc[pid])state.alloc[pid]=[];state.alloc[pid].push({l:"",a:0});saveState();render();}
-function updAllocLabel(pid,i,val){if(!state.alloc[pid])return;state.alloc[pid][i].l=val;saveState();}
-function updAllocAmt(pid,i,val){if(!state.alloc[pid])return;state.alloc[pid][i].a=parseFloat(val)||0;saveState();render();}
-function delAllocItem(pid,i){if(!state.alloc[pid])return;state.alloc[pid].splice(i,1);saveState();render();}
-function updAllocSavings(pid,val){
-  state.allocSavings=state.allocSavings||{};
-  const n=parseFloat(val);
-  if(val===''||isNaN(n)) state.allocSavings[pid]=null; // back to auto
-  else state.allocSavings[pid]=n;
-  saveState();render();
-}
-function updAllocSavingsSoft(pid,val){
-  state.allocSavings=state.allocSavings||{};
-  const n=parseFloat(val);
-  state.allocSavings[pid]=(val===''||isNaN(n))?null:n;
-  saveStateLocal();
-}
-
-// Paycheck actual received
-function setPayActual(pid,val){state.payActual=state.payActual||{};const n=parseFloat(val);if(val===''||isNaN(n))delete state.payActual[pid];else state.payActual[pid]=n;saveState();render();}
-function setPayActualSoft(pid,val){state.payActual=state.payActual||{};const n=parseFloat(val);if(val===''||isNaN(n))delete state.payActual[pid];else state.payActual[pid]=n;saveStateLocal();}
-
-// Extra expenses
-function addExpExtra(mk){state.expExtra=state.expExtra||{};if(!state.expExtra[mk])state.expExtra[mk]=[];state.expExtra[mk].push({l:"",a:0});saveState();render();}
-function updExpExtraLabel(mk,i,val){state.expExtra[mk][i].l=val;saveState();}
-function updExpExtraAmt(mk,i,val){state.expExtra[mk][i].a=parseFloat(val)||0;saveState();render();}
-function delExpExtra(mk,i){state.expExtra[mk].splice(i,1);saveState();render();}
-function updExpGas(mk,val){state.expGas=state.expGas||{};const n=parseFloat(val);state.expGas[mk]=(val===''||isNaN(n))?EXP_GAS_DEFAULT:n;saveState();render();}
-function updExpGasSoft(mk,val){state.expGas=state.expGas||{};const n=parseFloat(val);state.expGas[mk]=(val===''||isNaN(n))?EXP_GAS_DEFAULT:n;saveStateLocal();}
-
-// Extra freelance payments
-function addExtraPay(){
-  state.extraPay=state.extraPay||[];
-  const id="xp_"+Date.now();
-  state.extraPay.push({id,date:getToday(),label:"",amount:0,type:"standalone",alloc:[],allocSavings:null});
-  saveState();render();
-}
-function updExtraPay(id,field,val){
-  const xp=state.extraPay.find(x=>x.id===id);if(!xp)return;
-  if(field==='amount'){const n=parseFloat(val);xp.amount=isNaN(n)?0:n;}else xp[field]=val;
-  saveState();if(field==='type'||field==='date')render();
-}
-function updExtraPaySoft(id,field,val){
-  const xp=state.extraPay.find(x=>x.id===id);if(!xp)return;
-  if(field==='amount'){const n=parseFloat(val);xp.amount=isNaN(n)?0:n;}else xp[field]=val;
-  saveStateLocal();
-}
-function delExtraPay(id){state.extraPay=state.extraPay.filter(x=>x.id!==id);saveState();render();}
-function addExtraPayAlloc(id){const xp=state.extraPay.find(x=>x.id===id);if(!xp)return;if(!xp.alloc)xp.alloc=[];xp.alloc.push({l:"",a:0});saveState();render();}
-function updExtraPayAllocLabel(id,i,val){const xp=state.extraPay.find(x=>x.id===id);if(xp&&xp.alloc)xp.alloc[i].l=val;saveState();}
-function updExtraPayAllocAmt(id,i,val){const xp=state.extraPay.find(x=>x.id===id);if(xp&&xp.alloc){xp.alloc[i].a=parseFloat(val)||0;}saveState();render();}
-function delExtraPayAlloc(id,i){const xp=state.extraPay.find(x=>x.id===id);if(xp&&xp.alloc)xp.alloc.splice(i,1);saveState();render();}
-function updExtraPaySavings(id,val){
-  const xp=state.extraPay.find(x=>x.id===id);if(!xp)return;
-  const n=parseFloat(val);xp.allocSavings=(val===''||isNaN(n))?null:n;
-  saveState();render();
-}
-function updExtraPaySavingsSoft(id,val){
-  const xp=state.extraPay.find(x=>x.id===id);if(!xp)return;
-  const n=parseFloat(val);xp.allocSavings=(val===''||isNaN(n))?null:n;
-  saveStateLocal();
-}
-
-async function manualSync(){await pullFromSheets();render();if(SYNC_ENABLED)pushToSheets();}
-function resetAll(){if(confirm("Clear all entered data? This cannot be undone.")){state={act:{},actMode:{},actLabel:{},alloc:JSON.parse(JSON.stringify(DEF_ALLOC)),allocSavings:{},payActual:{},expExtra:{},expGas:{},extraPay:[],ui:{}};saveState();render();}}
-
-// ─── ALLOC BLOCK HELPER ───────────────────────────────────────────────────────
-function allocBlock(pid,alloc,allocSavings,baseAmt,onAddFn,onLabelFn,onAmtFn,onDelFn,onSavingsFn,onSavingsSoftFn){
-  const al=(alloc[pid]||[]).filter(a=>!a.isSavings);
-  const isOpen=state.ui["al_"+pid];
-  const autoSavings=computeAutoSavings(pid,alloc,baseAmt,allocSavings);
-  const override=(allocSavings||{})[pid];
-  const savingsAmt=override!==undefined&&override!==null?override:autoSavings;
-  const nonSavingsTotal=al.reduce((s,a)=>s+(a.a||0),0);
-  const totalAlloc=nonSavingsTotal+savingsAmt;
-  const diff=baseAmt-totalAlloc;
-  const statusHtml=`<span class="alloc-status" style="color:${Math.abs(diff)<0.01?'#16a34a':diff<0?'#ef4444':'#f59e0b'}">${Math.abs(diff)<0.01?'Fully allocated':diff>0?fmt(diff)+' unallocated':'−'+fmt(Math.abs(diff))+' over'}</span>`;
-
-  const rowsHtml=al.map((item,i)=>`<div class="alloc-row">
-    <input type="text" placeholder="e.g. Gas fund" value="${(item.l||'').replace(/"/g,'&quot;')}"
-      onchange="${onLabelFn}('${pid}',${i},this.value)" oninput="${onLabelFn}('${pid}',${i},this.value)"/>
-    <div class="alloc-amt-wrap"><span class="prefix">$</span>
-      <input type="number" inputmode="decimal" step="0.01" value="${item.a||''}"
-        onchange="${onAmtFn}('${pid}',${i},this.value)" oninput="${onAmtFn}('${pid}',${i},this.value)"/>
-    </div>
-    <button class="del-btn" onclick="${onDelFn}('${pid}',${i})">×</button>
-  </div>`).join('');
-
-  const savingsInputVal=override!==null&&override!==undefined?override:'';
-  const savingsRowHtml=`<div class="alloc-savings-row">
-    <div style="display:flex;align-items:center;gap:6px">
-      <span style="font-size:12px;color:#4ade80;font-weight:600">→ Savings</span>
-      <span style="font-size:10px;color:var(--txt3)">${override!==null&&override!==undefined?'(manual)':'(auto)'}</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <div class="alloc-amt-wrap" style="width:100px"><span class="prefix">$</span>
-        <input type="number" inputmode="decimal" step="0.01"
-          placeholder="${autoSavings.toFixed(2)}"
-          value="${savingsInputVal}"
-          style="color:#4ade80;border-color:${override!==null&&override!==undefined?'#4ade8055':'var(--border2)'}"
-          onchange="${onSavingsFn}('${pid}',this.value)"
-          oninput="${onSavingsSoftFn}('${pid}',this.value)"
-          onblur="${onSavingsFn}('${pid}',this.value)"/>
-      </div>
-      ${override!==null&&override!==undefined?`<button onclick="${onSavingsFn}('${pid}','')" style="font-size:9px;padding:1px 5px;border-radius:4px;border:1px solid var(--border2);background:none;color:var(--txt3);cursor:pointer">auto</button>`:''}
-    </div>
-  </div>`;
-
-  return`<div class="pay-alloc-toggle" onclick="toggle('al_${pid}')">
-    <div class="pay-alloc-label"><span class="toggle-arrow${isOpen?' open':''}">&#9654;</span>Where this money goes</div>
-    ${statusHtml}
-  </div>
-  ${isOpen?`<div class="alloc-body">
-    ${rowsHtml}
-    <div class="alloc-footer" style="margin-bottom:0">
-      <button class="add-alloc-btn" onclick="${onAddFn}('${pid}')">+ Add allocation</button>
-      <div class="alloc-totals">Non-savings: <b>${fmt(nonSavingsTotal)}</b></div>
-    </div>
-    ${savingsRowHtml}
-  </div>`:''}`;
-}
-
-// ─── RENDER ───────────────────────────────────────────────────────────────────
-function render(){
-  const today=getToday();
-  const{act,ui,alloc,allocSavings,payActual,expExtra,expGas,extraPay}=state;
-  const pp=computePayPeriods(act,extraPay,today);
-  const xpByDate=buildExtraPayByDate(extraPay);
-
-  const standaloneTotal=(extraPay||[]).filter(x=>x.type==="standalone").reduce((s,x)=>s+(x.amount||0),0);
-  const entered=new Set(Object.keys(act).filter(ds=>act[ds]>0||xpByDate[ds]>0));
-  // Total daily earned (act values stored as $) + standalone extra
-  const totalActDays=Object.values(act).reduce((s,v)=>s+v,0);
-  const totalAct=totalActDays+standaloneTotal;
-  const totalExpAll=allDays.reduce((s,d)=>s+d.e,0);
-
-  // Total expenses across all months
-  const totalExpenses=BASE_EXP_DATES.reduce((s,d)=>s+monthTotalExp(d.slice(0,7)),0);
-  const expPaid=BASE_EXP_DATES.filter(d=>d<=today).reduce((s,d)=>s+monthTotalExp(d.slice(0,7)),0);
-
-  const p0Alloc=alloc.p0||[];
-  const p0NonSavings=p0Alloc.filter(a=>!a.isSavings).reduce((s,a)=>s+(a.a||0),0);
-
-  // Use payActual if set, else fall back to actTotal/projGross
-  const cashReceived=pp.reduce((s,p)=>{
-    if(!p.received)return s;
-    const actual=payActual[p.id]!==undefined?payActual[p.id]:null;
-    if(p.fixed)return s+(actual!==null?actual:p.gross);
-    return s+(actual!==null?actual:p.actTotal||0);
-  },0)+standaloneTotal;
-  const curBal=START_BAL+(pp[0].received?cashReceived-p0NonSavings:cashReceived)-expPaid;
-
-  const projReceivedByAug=pp.filter(p=>!p.pending).reduce((s,p)=>{
-    const actual=payActual[p.id]!==undefined?payActual[p.id]:null;
-    if(p.fixed)return s+(actual!==null?actual:p.gross)-p0NonSavings;
-    return s+(actual!==null?actual:p.projGross||p.gross);
-  },0)+standaloneTotal;
-  const projBalAug31=START_BAL+projReceivedByAug-totalExpenses;
-  const sepPP=pp.find(p=>p.pending);
-  const pendingAmt=sepPP?(sepPP.projGross||sepPP.gross||0):0;
-  const projBalTotal=projBalAug31+pendingAmt;
-  const surplus=projBalAug31-5500;
-  const pct=Math.min(100,Math.max(0,(curBal/5500)*100));
-
-  // enteredDays: any day that has a daily log OR a standalone XP entry
-  const enteredDays=new Set([...Object.keys(act),...Object.keys(xpByDate)]);
-  // expected for all entered days (daily logs + XP days)
-  const expForEntered=allDays.filter(d=>enteredDays.has(d.ds)).reduce((s,d)=>s+d.e,0);
-  // actual for all entered days = daily inputs + standalone XP on those days
-  const actForEntered=allDays.filter(d=>enteredDays.has(d.ds)).reduce((s,d)=>s+(act[d.ds]||0)+(xpByDate[d.ds]||0),0);
-  const aheadBehind=actForEntered-expForEntered;
-  const isAhead=aheadBehind>=0;
-  const remainToEarn=Math.max(0,5680-totalAct);
-
-  // ── Pace box ──
-  const paceHtml=enteredDays.size===0
-    ?`<div class="pace-box neutral"><div style="font-size:13px;color:var(--txt3);font-weight:500">Start logging days to track your progress</div></div>`
-    :`<div class="pace-box ${isAhead?'ahead':'behind'}">
-        <div class="pace-label" style="color:${isAhead?'#86efac':'#fdba74'}">${isAhead?'Ahead of Schedule':'Behind Schedule'}</div>
-        <div class="pace-amt" style="color:${isAhead?'#4ade80':'#fb923c'}">${isAhead?'+':'−'}${fmt(Math.abs(aheadBehind))}</div>
-        <div class="pace-note">vs expected across ${enteredDays.size} logged day${enteredDays.size!==1?'s':''}</div>
-      </div>`;
-
-  // ── Weeks ──
-  let weeksHtml='',prevMo=-1;
+  let whtml='',prevMo=-1;
+  const td2=today();
   weeks.forEach((wk,wi)=>{
-    const wExp=wk.reduce((s,d)=>s+d.e,0);
-    const wActDays=wk.reduce((s,d)=>s+(act[d.ds]??0),0);
-    const wActXP=wk.reduce((s,d)=>s+(xpByDate[d.ds]||0),0);
-    const wAct=wActDays+wActXP;
-    const hasE=wk.some(d=>act[d.ds]!==undefined||xpByDate[d.ds]>0);
-    const allFilled=wk.filter(d=>d.e>0).every(d=>act[d.ds]!==undefined);
-    const wDiff=wAct-wExp;
-    const isOpen=ui["w"+wi];
+    const wKey=wk[0].ds;const frEntries=(state.weekFr[wKey]||[]);const frWkTot=frEntries.reduce((s,e)=>s+(e.amount||0),0);
+    const wExp=wk.reduce((s,d)=>s+d.e,0);const wActDays=wk.reduce((s,d)=>s+(state.act[d.ds]??0),0);const wAct=wActDays+frWkTot;
+    const hasE=wk.some(d=>state.act[d.ds]!==undefined)||frWkTot>0;
+    const allFilled=wk.filter(d=>d.e>0).every(d=>state.act[d.ds]!==undefined);
+    const wDiff=wAct-wExp;const isOpen=state.ui["w"+wi];
     const f=wk[0],la=wk[wk.length-1];
-    const wLabel=MN[f.mo]+" "+f.dy+(f.mo!==la.mo?" – "+MN[la.mo]+" "+la.dy:" – "+la.dy);
-    const hasToday=wk.some(d=>d.ds===today);
-    const earnTypes=[...new Set(wk.filter(d=>d.e>0).map(d=>d.t))];
+    const wLbl=MN[f.mo]+" "+f.dy+(f.mo!==la.mo?" – "+MN[la.mo]+" "+la.dy:" – "+la.dy);
+    const hasTd=wk.some(d=>d.ds===td2);const earnT=[...new Set(wk.filter(d=>d.e>0).map(d=>d.t))];
     const frDays=wk.filter(d=>d.t==="fr").length;
-
-    if(f.mo!==prevMo){weeksHtml+=`<div class="month-head">${MN[f.mo]} ${f.ds.slice(0,4)}</div>`;prevMo=f.mo;}
-
-    const typeDots=earnTypes.map(t=>`<span class="type-dot" style="background:${t==='bc'?'#3b82f6':t==='ml'?'#22c55e':'#f59e0b'}"></span>`).join('');
-    const diffHtml=hasE?`<span style="color:var(--txt);font-weight:700">${fmt(wAct)}</span><span class="week-diff ${wDiff>=0?'pos':'neg'}">${wDiff>=0?'+':'−'}${fmt(Math.abs(wDiff))}</span>`:'';
-
-    let rowsHtml='';
+    if(f.mo!==prevMo){whtml+=`<div class="mo-hd">${MN[f.mo]} ${f.ds.slice(0,4)}</div>`;prevMo=f.mo;}
+    const dots=earnT.map(t=>`<span class="tdot" style="background:${t==='bc'?'#3b82f6':t==='ml'?'#22c55e':'#f59e0b'}"></span>`).join('');
+    const diffH=hasE?`<span style="color:var(--tx);font-weight:700">${fmt(wAct)}</span><span class="wk-diff ${wDiff>=0?'pos':'neg'}">${wDiff>=0?'+':'−'}${fmt(Math.abs(wDiff))}</span>`:'';
+    let body='';
     if(isOpen){
-      rowsHtml=`<div class="day-col-heads">
-        <span class="col-day">Day</span><span class="col-date">Date</span>
-        <span class="col-type">Type</span><span class="col-exp">Expected</span>
-        <span class="col-act">Actual</span><span class="col-diff">vs goal</span>
-      </div>`;
-
+      body+=`<div class="dcols"><span class="cd">Day</span><span class="cdt">Date</span><span class="ct2">Type</span><span class="ce">Expected</span><span class="ca">Actual earned</span><span class="cdi">vs goal</span></div>`;
       wk.forEach(d=>{
-        const a=act[d.ds];
-        const xpAmt=xpByDate[d.ds]||0;
-        // Combined actual = logged daily + any standalone XP on that date
-        const combined=(a||0)+xpAmt;
-        const hasDay=a!==undefined;
-        const hasXP=xpAmt>0;
-        const hasAny=hasDay||hasXP;
-        const diff=hasAny?combined-d.e:null;
-        const isT=d.ds===today;
-        const mode=(state.actMode||{})[d.ds]||'$';
-
-        // ALL day types get toggle + input (weekends too)
-        const canToggle=true;
-        let dispVal='';
-        if(hasDay){
-          if(mode==='bc_hrs') dispVal=parseFloat((a/BC_RATE).toFixed(2));
-          else if(mode==='ml_hrs') dispVal=parseFloat((a/ML_RATE).toFixed(2));
-          else dispVal=a;
-        }
-        // For weekends, default mode hint depends on day type (use ml_hrs as default hrs)
-        const dayType=d.t==='bc'?'bc':'ml'; // bc days use BC_RATE, everything else ML_RATE
-        const modeLabel=mode==='$'?'$':'hrs';
-        const modeBtnClass=mode==='$'?'dollar':'hrs';
-        const step=mode==='$'?'0.01':'0.5';
+        const a=state.act[d.ds];const hasDay=a!==undefined;const xp=frByDate[d.ds]||0;const combined=(a||0)+xp;const hasAny=hasDay||xp>0;
+        const diff=hasAny?combined-d.e:null;const isT=d.ds===td2;
+        const mode=state.actMode[d.ds]||'$';const rate=getRate(d.ds);
+        let disp='';if(hasDay){disp=mode==='hrs'?+(a/rate).toFixed(2):a;}
+        const ml=mode==='$'?'$':'hrs';const mc=mode==='$'?'dol':'hrs';const step=mode==='$'?'.01':'.5';
         const ph=mode==='$'?(d.e>0?d.e.toFixed(0):'0'):'hrs';
-
-        // Show XP annotation if there's extra pay on this day
-        const xpNote=hasXP?`<span style="font-size:9px;color:#f59e0b;margin-left:2px" title="Includes +${fmt(xpAmt)} from extra payment">+${fmt(xpAmt)}</span>`:'';
-
-        const diffStr=diff!==null?`<span style="color:${diff>=0?'#4ade80':'#ef4444'}">${diff>=0?'+':'−'}${fmt(Math.abs(diff))}</span>`:'<span style="color:transparent">.</span>';
-
-        const inputClass=`day-input${hasXP&&!hasDay?' xp-val':hasDay?' has-val':''}`;
-
-        const lbl=(state.actLabel||{})[d.ds]||'';
-        const hasLbl=lbl.length>0;
-        rowsHtml+=`<div class="day-row${isT?' today-row':d.t==='wk'?' wknd-row':''}" style="flex-wrap:wrap">
-          <span class="day-name${d.t==='wk'?' wknd':''}">${DN[d.dow]}</span>
-          <span class="day-date">${MN[d.mo]} ${d.dy}</span>
-          <span class="day-type-pill" style="background:${d.bg};color:${d.cl}">${d.l}</span>
-          <span class="day-exp">${d.e>0?fmt(d.e):'—'}</span>
-          <div class="day-act-cell">
-            <button class="mode-btn ${modeBtnClass}" onclick="cycleMode('${d.ds}','${dayType}')">${modeLabel}</button>
-            <input class="${inputClass}" type="number" inputmode="decimal" step="${step}"
-              placeholder="${ph}" value="${dispVal}"
-              oninput="setActualSoft('${d.ds}',this.value)"
-              onblur="setActual('${d.ds}',this.value)"
-              onchange="setActual('${d.ds}',this.value)"/>
-            ${xpNote}
+        const rateHint=mode==='hrs'?`<span style="font-size:9px;color:var(--tx3);margin-left:2px">×$${rate.toFixed(2)}</span>`:'';
+        const xpNote=xp>0?`<span style="font-size:9px;color:#f59e0b;margin-left:2px">+${fmt(xp)}</span>`:'';
+        const diffStr=diff!==null?`<span style="color:${diff>=0?'#4ade80':'var(--red)'}">${diff>=0?'+':'−'}${fmt(Math.abs(diff))}</span>`:'<span style="color:transparent">.</span>';
+        const lbl=state.actLabel[d.ds]||'';const hasLbl=lbl.length>0;
+        // Show mode toggle for all day types except off
+        const showMode=d.t!=='off';
+        const lblRow=hasAny||hasLbl?`<div style="width:100%;padding:2px 0 1px"><input type="text" placeholder="Add a note…" value="${lbl.replace(/"/g,'&quot;')}" class="dlbl${hasLbl?' hl':''}" oninput="setLbl('${d.ds}',this.value,true)" onblur="setLbl('${d.ds}',this.value,false)"/></div>`:'';
+        body+=`<div class="drow${isT?' td':d.t==='wk'?' wk2':''}">
+          <span class="dn${d.t==='wk'?' w':''}">${DN[d.dow]}</span>
+          <span class="ddt">${MN[d.mo]} ${d.dy}</span>
+          <span class="dtyp" style="background:${d.bg};color:${d.cl}">${d.l}</span>
+          <span class="dexp">${d.e>0?fmt(d.e):'—'}</span>
+          <div class="dact">
+            ${showMode?`<button class="mdb ${mc}" onclick="cycleMode('${d.ds}')">${ml}</button>`:''}
+            <input class="dinp${hasDay?' hv':''}" type="number" inputmode="decimal" step="${step}" placeholder="${ph}" value="${disp}"
+              oninput="setAct('${d.ds}',this.value,true)" onblur="setAct('${d.ds}',this.value,false)"/>
+            ${rateHint}${xpNote}
           </div>
-          <span class="day-diff-cell">${diffStr}</span>
-          ${hasAny||hasLbl?`<div style="width:100%;padding:2px 0 3px 0;margin-top:1px">
-            <input type="text" placeholder="Add a note… (e.g. mowed lawns)" value="${lbl.replace(/"/g,'&quot;')}"
-              style="width:100%;padding:3px 8px;font-size:11px;border-radius:5px;border:1px solid ${hasLbl?'#354a66':'var(--border)'};background:${hasLbl?'#111827':'transparent'};color:${hasLbl?'var(--txt)':'var(--txt3)'};outline:none;font-family:'DM Sans',sans-serif;transition:all 0.15s"
-              oninput="setActualLabelSoft('${d.ds}',this.value)"
-              onblur="setActualLabel('${d.ds}',this.value)"
-              onchange="setActualLabel('${d.ds}',this.value)"/>
-          </div>`:''}
+          <span class="ddif">${diffStr}</span>
+          ${lblRow}
         </div>`;
       });
-
-      rowsHtml+=`<div class="week-footer">
-        ${!allFilled?`<button class="fill-btn" onclick="fillWeek(${wi})">Fill expected</button>`:`<span class="all-logged">All earning days logged</span>`}
-        ${frDays>0?`<span style="color:var(--txt3);font-size:11px">FR target: $${frDays*FR_DAILY}</span>`:''}
-      </div>`;
+      body+=`<div class="wk-ft">${!allFilled?`<button class="fill-btn" onclick="fillWk(${wi})">Fill expected</button>`:`<span class="ald">✓ All earning days logged</span>`}${frDays>0?`<span style="color:var(--tx3)">FR target: $${frDays*FR_DAILY}</span>`:''}</div>`;
+      body+=`<div class="fr-zone"><div class="fr-hd"><span>💼 Freelance Work This Week</span>${frEntries.length>0?`<span style="font-family:'DM Mono',monospace">${fmt(frWkTot)}</span>`:''}</div>`;
+      frEntries.forEach(e=>{const isPend=e.payDate&&e.payDate>td2;const isRcvd=e.payDate&&e.payDate<=td2;
+        body+=`<div class="fr-row">
+          <input class="ti" type="text" placeholder="Description (e.g. dog walking)" value="${(e.label||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px" oninput="updWkFr('${wKey}','${e.id}','label',this.value,true)" onblur="updWkFr('${wKey}','${e.id}','label',this.value,false)"/>
+          <div class="nw"><span class="pre">$</span><input class="ni" type="number" inputmode="decimal" step=".01" placeholder="0" value="${e.amount||''}" style="width:84px" oninput="updWkFr('${wKey}','${e.id}','amount',this.value,true)" onblur="updWkFr('${wKey}','${e.id}','amount',this.value,false)"/></div>
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Work date</span><input class="di" type="date" value="${e.workDate||''}" onchange="updWkFr('${wKey}','${e.id}','workDate',this.value,false)"/></div>
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:9px;color:${isPend?'#fbbf24':isRcvd?'#4ade80':'var(--tx3)'};text-transform:uppercase;letter-spacing:.5px">Pay date ${isPend?'⏳':isRcvd?'✓':''}</span><input class="di${isPend?' pend':isRcvd?' rcvd':''}" type="date" value="${e.payDate||''}" onchange="updWkFr('${wKey}','${e.id}','payDate',this.value,false)"/></div>
+          <button class="del" onclick="delWkFr('${wKey}','${e.id}')">×</button>
+        </div>`;
+      });
+      body+=`<button class="fr-add" onclick="addWkFr('${wKey}')">+ Add freelance work</button></div>`;
     }
-
-    weeksHtml+=`<div class="week-card${hasToday?' current-week':''}">
-      <div class="week-header" onclick="toggle('w${wi}')">
-        <div class="week-header-left">
-          <span class="toggle-arrow${isOpen?' open':''}">&#9654;</span>
-          <span class="week-label">${wLabel}</span>
-          ${hasToday?'<span class="now-badge">NOW</span>':''}
-          <div class="type-dots">${typeDots}</div>
-        </div>
-        <div class="week-header-right">
-          <span class="week-goal">Goal: <b>${fmt(wExp)}</b></span>
-          ${diffHtml}
-        </div>
-      </div>
-      ${rowsHtml}
-    </div>`;
+    whtml+=`<div class="wk${hasTd?' now':''}"><div class="wk-hd" onclick="tog('w${wi}')"><div class="wk-hl"><span class="arr${isOpen?' o':''}">&#9654;</span><span class="wk-n">${wLbl}</span>${hasTd?'<span class="now-b">NOW</span>':''}<div class="tdots">${dots}</div></div><div class="wk-hr"><span class="wk-goal">Goal: <b>${fmt(wExp)}</b></span>${diffH}</div></div>${body}</div>`;
   });
 
-  // ── Paychecks ──
-  let payHtml='';
-  if(ui.pay){
-    let cardsHtml='';
-    pp.forEach(p=>{
-      const status=p.pending?"pending":p.received?"received":"upcoming";
-      const stLabel=status==="received"?"Received":status==="pending"?"Pending (Sep)":"Upcoming";
-      const receivedAmt=payActual[p.id]!==undefined?payActual[p.id]:null;
-      const projAmt=p.fixed?p.gross:(p.projGross||p.gross);
-      const displayAmt=receivedAmt!==null?receivedAmt:projAmt;
-      const projDelta=projAmt-p.gross;
-      const hasLogged=!p.fixed&&p.actTotal>0;
-      const hasReceived=receivedAmt!==null;
-      const baseForAlloc=receivedAmt!==null?receivedAmt:displayAmt;
+  const ec=state.ui.earnChart||'work';
+  return`<div class="dash">
+    <div class="dash-hd"><div><h1>Summer 2026 Savings</h1><div class="dash-sub">Gap Year Fund &bull; Apr 16 – Aug 31</div></div><div class="dc">Days logged<b>${entered.size} / ${allDays.length}</b></div></div>
+    ${mkPaceHtml(aheadBehind,entered,frByDate,true)}
+    <div class="bar-wrap">
+      <div class="bar-lbl"><span>Earnings progress (instant)</span><span style="font-family:'DM Mono',monospace;font-weight:700">${fmts(earnBarVal)} · <span style="color:#3b82f6">${pctTo6k}% to $6k</span></span></div>
+      <div class="bar-bg">
+        <div style="position:absolute;left:${hPct}%;top:0;width:${100-hPct}%;height:100%;background:rgba(34,197,94,.15);border-radius:0 7px 7px 0"></div>
+        <div class="bar-fill" style="width:${pct}%;background:${earnBarVal>=GHIGH?'linear-gradient(90deg,#22c55e,#4ade80)':earnBarVal>=GTGT?'linear-gradient(90deg,#3b82f6,#22c55e)':earnBarVal>=GMIN?'linear-gradient(90deg,#6366f1,#3b82f6)':'linear-gradient(90deg,#f59e0b,#6366f1)'}"></div>
+        <div style="position:absolute;left:${minPct}%;top:0;width:2px;height:100%;background:#6366f1;opacity:.8"></div>
+        <div style="position:absolute;left:${tPct}%;top:0;width:2px;height:100%;background:#3b82f6;opacity:.8"></div>
+        <div style="position:absolute;left:${hPct}%;top:0;width:2px;height:100%;background:#22c55e;opacity:.8"></div>
+      </div>
+      <div class="bar-hints"><span style="color:#6366f1">▎$5,500 min</span><span style="color:#3b82f6">▎$6,000 target</span><span style="color:#22c55e">▎$6,500 high</span><span style="color:#4ade80">📷 $8,500 camera</span></div>
+    </div>
+    <div class="sg">
+      <div class="sc"><div class="sc-l">Total Earned</div><div class="sc-v">${fmts(totalEarned)}</div><div class="sc-s">incl. bday: ${bdayE>0?`+${fmts(bdayE)}`:'—'}</div></div>
+      <div class="sc"><div class="sc-l">Projected Aug 31</div><div class="sc-v" style="color:${projBal>=GMIN?'#4ade80':'#fbbf24'}">${fmts(projBal)}</div><div class="sc-s" style="color:${projBal>=GTGT?'#4ade80':'#f59e0b'}">${projBal>=GTGT?'✓ Above $6k target':'keep going'}</div></div>
+      <div class="sc"><div class="sc-l">% to $6k Target</div><div class="sc-v" style="color:#3b82f6">${pctTo6k}%</div><div class="sc-s">${fmt(GTGT-earnBarVal>0?GTGT-earnBarVal:0)} to go</div></div>
+      <div class="sc"><div class="sc-l">Still Need for 📷</div><div class="sc-v">${fmts(stillNeedCam)}</div><div class="sc-s">to hit $8,500 camera goal</div></div>
+    </div>
+    ${pendAmt>0?`<div class="sep-note">+${fmts(pendAmt)} arriving Sep → total: <b>${fmts(projBal+pendAmt)}</b></div>`:''}
+  </div>
+  <div class="cw">
+    <div class="ct">
+      <span>Cumulative Earnings vs Goals</span>
+      <div class="cl">
+        ${ec==='work'||ec==='both'?`<div class="cl-i"><div style="width:16px;height:2px;background:#6366f1;border-radius:1px"></div>Expected</div><div class="cl-i"><div style="width:16px;height:2px;background:#4ade80;border-radius:1px"></div>Actual work</div>`:''}
+        ${ec==='deps'||ec==='both'?`<div class="cl-i"><div style="width:16px;height:2px;background:#3b82f6;border-radius:1px"></div>Deposits</div>`:''}
+        <select class="chart-sel" onchange="setEarnChart(this.value)"><option value="work"${ec==='work'?' selected':''}>Work vs Expected</option><option value="deps"${ec==='deps'?' selected':''}>Actual Deposits</option><option value="both"${ec==='both'?' selected':''}>Both Overlaid</option></select>
+      </div>
+    </div>
+    <canvas id="cc" height="200"></canvas>
+  </div>
+  <div class="cw">
+    <div class="ct"><span>Weekly: Goal vs Actual</span><div class="cl"><div class="cl-i"><div style="width:8px;height:8px;border-radius:2px;background:#1e3a5f;border:1px solid #3b82f6"></div>Goal</div><div class="cl-i"><div style="width:8px;height:8px;border-radius:2px;background:#4ade80"></div>At/above</div><div class="cl-i"><div style="width:8px;height:8px;border-radius:2px;background:#fb923c"></div>Below</div></div></div>
+    <canvas id="cwk" height="160"></canvas>
+  </div>
+  <div class="leg"><span class="lp" style="background:#1e3a5f;color:#3b82f6"><span class="ld" style="background:#3b82f6"></span>Boulder County</span><span class="lp" style="background:#14391f;color:#22c55e"><span class="ld" style="background:#22c55e"></span>Mobile Lab</span><span class="lp" style="background:#3d2e0a;color:#f59e0b"><span class="ld" style="background:#f59e0b"></span>Freelance</span><span class="lp" style="background:#1e2a38;color:#64748b"><span class="ld" style="background:#64748b"></span>Off</span><span class="lp" style="background:#141e2e;color:#475569"><span class="ld" style="background:#475569"></span>Weekend</span></div>
+  ${whtml}<div class="rst"><button class="rst-btn" onclick="resetAll()">Reset All Data</button></div>`;
+}
 
-      let srcHtml='';
-      if(p.fixed) srcHtml=`<span style="color:var(--txt3)">Prior period paycheck</span>`;
-      else{
-        if(p.bcN>0) srcHtml+=`<span style="color:#3b82f6;font-weight:600">BC: ${p.bcN}d × ${fmt(BC_DAILY)} = ${fmt(p.bcA)}</span>`;
-        if(p.mlN>0) srcHtml+=`<span style="color:#22c55e;font-weight:600">ML: ${p.mlN}d × ${fmt(ML_DAILY)} = ${fmt(p.mlA)}</span>`;
-        if(p.frN>0) srcHtml+=`<span style="color:#f59e0b;font-weight:600">FR: ${p.frN}d × $${FR_DAILY} = ${fmt(p.frA)}</span>`;
-        if(p.extraBonus>0) srcHtml+=`<span style="color:#a5b4fc;font-weight:600">+${fmt(p.extraBonus)} freelance</span>`;
-        if(hasLogged&&!p.received){const pct=Math.round((p.actTotal/(p.projGross||1))*100);srcHtml+=`<span style="color:var(--txt3);font-size:11px">${pct}% logged</span>`;}
-      }
+// ── RENDER: MANAGING MONEY TAB ─────────────────────────────────────────
+function renderManage(td,pp,totExp){
+  const {frByDate,frTot,bdayE,totalEarned,entered,aheadBehind}=computeEarnTotals(td);
+  const td2=today();const tsb=trueSavBal(td2);
+  // Managing money bar: only actual deposits
+  const pct=Math.min(100,Math.max(0,(tsb/GMIN)*100));
+  const expPaid=EXP_DATES.filter(d=>d<=td2).reduce((s,d)=>{const ev=getEV(d.slice(0,7));return s+ev.net+((state.expEx[d.slice(0,7)]||[]).reduce((a,e)=>a+(e.a||0),0));},0);
+  const p0al=state.alloc.p0||[];const p0non=p0al.reduce((s,a)=>s+(a.a||0),0);
+  const projByAug=pp.filter(p=>!p.pending).reduce((s,p)=>{const act=state.payActual[p.id]??null;if(p.fixed)return s+(act!=null?act:p.gross)-p0non;return s+(act!=null?act:p.projGross||p.gross);},0)+frTot+bdayE;
+  const projBal=START+projByAug-totExp;const surplus=projBal-GMIN;
+  const sepPP=pp.find(p=>p.pending);const pendAmt=sepPP?(sepPP.projGross||sepPP.gross||0):0;
+  const bdayTot=BDAY.reduce((s,g)=>state.bdayChk[g.id]?s+g.amount:s,0);
+  const expDedByPid=buildExpDedByPid(pp);
+  const deps=state.deps||[];const totDep=deps.reduce((s,d)=>s+(d.amtSav||0),0);const depsOpen=state.ui.deps;
+  const mc=state.ui.manChart||'deps';
 
-      let projNote='';
-      if(!p.fixed&&hasLogged&&!p.received&&Math.abs(projDelta)>=0.01){
-        projNote=`<div style="font-size:11px;padding:5px 14px 6px;border-top:1px solid var(--border);background:#0e1520;color:${projDelta>=0?'#4ade80':'#fb923c'}">
-          ${projDelta>=0?'▲':'▼'} Projected ${projDelta>=0?'above':'below'} schedule by ${fmt(Math.abs(projDelta))}
-          <span style="color:var(--txt3)"> (scheduled: ${fmt(p.gross)})</span>
-        </div>`;
-      }
-
-      const receivedDiff=hasReceived?receivedAmt-p.gross:null;
-      const receivedRow=`<div class="pay-received-row">
-        <span style="font-size:11px;color:var(--txt3);white-space:nowrap;flex-shrink:0">Actual received:</span>
-        <div style="position:relative;flex:1;max-width:130px">
-          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none">$</span>
-          <input type="number" inputmode="decimal" step="0.01" placeholder="${p.gross.toFixed(0)}" value="${hasReceived?receivedAmt:''}"
-            style="width:100%;padding:5px 6px 5px 18px;font-size:13px;border-radius:7px;border:1px solid ${hasReceived?'#4ade8055':'var(--border2)'};background:${hasReceived?'#0d2010':'#0e1520'};color:var(--txt);outline:none;font-family:'DM Mono',monospace;box-sizing:border-box"
-            oninput="setPayActualSoft('${p.id}',this.value)"
-            onblur="setPayActual('${p.id}',this.value)"
-            onchange="setPayActual('${p.id}',this.value)"/>
-        </div>
-        ${receivedDiff!==null?`<span style="font-size:11px;font-weight:700;color:${receivedDiff>=0?'#4ade80':'#ef4444'}">${receivedDiff>=0?'+':'−'}${fmt(Math.abs(receivedDiff))}</span>`:''}
-        ${hasReceived?`<span style="font-size:10px;background:#0d2010;color:#4ade80;padding:2px 7px;border-radius:6px;font-weight:600">✓ Logged</span>`:`<span style="font-size:10px;color:var(--txt3)">enter when paid</span>`}
-      </div>`;
-
-      cardsHtml+=`<div class="pay-card">
-        <div class="pay-header ${status}">
-          <div><div class="pay-title">${p.label}</div><div class="pay-desc">Pay period: ${p.desc}</div></div>
-          <div style="text-align:right">
-            <span class="pay-badge ${status}">${stLabel}</span>
-            <div class="pay-gross" style="color:${hasReceived?'#4ade80':'inherit'}">${fmt(displayAmt)}</div>
-            ${!p.fixed&&Math.abs(projDelta)>=0.01&&!hasReceived?`<div style="font-size:10px;color:var(--txt3);margin-top:1px">sched: ${fmt(p.gross)}</div>`:''}
-          </div>
-        </div>
-        <div class="pay-sources">${srcHtml}</div>
-        ${projNote}
-        ${receivedRow}
-        ${allocBlock(p.id,alloc,allocSavings,baseForAlloc,'addAllocItem','updAllocLabel','updAllocAmt','delAllocItem','updAllocSavings','updAllocSavingsSoft')}
-      </div>`;
+  // Deposits section
+  let depsH=`<div style="margin-bottom:16px"><div class="sec-hd" onclick="tog('deps')"><span class="arr${depsOpen?' o':''}">&#9654;</span>Money Received &amp; Deposited${totDep>0?`<span style="font-size:11px;color:#4ade80;margin-left:auto;font-family:'DM Mono',monospace">${fmts(totDep)} to savings</span>`:''}</div>`;
+  if(depsOpen){
+    depsH+=`<div>${deps.length===0?`<div style="padding:12px;color:var(--tx3);font-size:13px;text-align:center">No deposits logged yet — add one when you receive money.</div>`:''}`;
+    deps.forEach(dep=>{
+      const hasSent=!!dep.dateSent;const isPend=dep.dateSent&&dep.dateSent>td2;
+      depsH+=`<div class="dep-card"><div class="dep-hd"><div style="display:flex;align-items:center;gap:8px;min-width:0"><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:${hasSent&&!isPend?'rgba(74,222,128,.12)':'rgba(251,191,36,.12)'};color:${hasSent&&!isPend?'#4ade80':'#fbbf24'}">${hasSent&&!isPend?'✓ In Savings':hasSent?'⏳ Pending':'📥 Received'}</span><span style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${dep.source||'Payment'}</span></div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${dep.amtSav?`<span style="font-size:14px;font-weight:800;font-family:'Syne',sans-serif;color:#4ade80">${fmt(dep.amtSav)}</span>`:''}<button class="del" onclick="delDep('${dep.id}')">×</button></div></div><div class="dep-body"><div class="dep-g">
+        <div class="dep-f"><div class="dep-fl">Source / Description</div><input class="dep-i" type="text" placeholder="e.g. May paycheck" value="${(dep.source||'').replace(/"/g,'&quot;')}" oninput="updDep('${dep.id}','source',this.value,true)" onblur="updDep('${dep.id}','source',this.value,false)"/></div>
+        <div class="dep-f"><div class="dep-fl">Amount Received</div><input class="dep-i" type="number" inputmode="decimal" step=".01" placeholder="0" value="${dep.amtRcvd||''}" oninput="updDep('${dep.id}','amtRcvd',this.value,true)" onblur="updDep('${dep.id}','amtRcvd',this.value,false)"/></div>
+        <div class="dep-f"><div class="dep-fl">Date Received</div><input class="dep-i" type="date" value="${dep.dateRcvd||''}" onchange="updDep('${dep.id}','dateRcvd',this.value,false)"/></div>
+        <div class="dep-f"><div class="dep-fl">Amount to Savings</div><input class="dep-i${dep.amtSav?' sn':''}" type="number" inputmode="decimal" step=".01" placeholder="0" value="${dep.amtSav||''}" oninput="updDep('${dep.id}','amtSav',this.value,true)" onblur="updDep('${dep.id}','amtSav',this.value,false)"/></div>
+        <div class="dep-f"><div class="dep-fl">Date Sent to Savings</div><input class="dep-i${dep.dateSent?' sn':''}" type="date" value="${dep.dateSent||''}" onchange="updDep('${dep.id}','dateSent',this.value,false)"/></div>
+        <div class="dep-f"><div class="dep-fl">Note (optional)</div><input class="dep-i" type="text" placeholder="e.g. After car expenses" value="${(dep.note||'').replace(/"/g,'&quot;')}" oninput="updDep('${dep.id}','note',this.value,true)" onblur="updDep('${dep.id}','note',this.value,false)"/></div>
+      </div></div></div>`;
     });
+    depsH+=`<button class="add-dep" onclick="addDep()">+ Log a Deposit</button></div>`;
+  }
+  depsH+=`</div>`;
 
+  // Birthday goals
+  const bdayOpen=state.ui.bday;
+  let bdayH=`<div class="bday-sec"><div class="bday-hd" onclick="tog('bday')"><div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px">🎂 Birthday Goals</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">$1,000 total · check off when completed · counts toward earned total</div></div><div style="text-align:right"><div style="font-size:11px;color:var(--tx3)">${Object.keys(state.bdayChk).length}/4 completed</div>${bdayTot>0?`<div style="font-size:14px;font-weight:800;font-family:'Syne',sans-serif;color:#fbbf24">${fmts(bdayTot)}</div>`:''}<span class="arr${bdayOpen?' o':''}" style="font-size:9px;color:var(--tx3)">&#9654;</span></div></div>`;
+  if(bdayOpen)BDAY.forEach(g=>{
+    const chk=state.bdayChk[g.id];const isChk=!!chk;const isPend=isChk&&(chk.payDate||'')>td2;const alOpen=state.ui["al_bday_"+g.id];
+    const al=state.bdayAlloc[g.id]||[];const nonSav=al.reduce((s,a)=>s+(a.a||0),0);const auto=Math.max(0,g.amount-nonSav);const ov=state.bdaySav[g.id];const sav=ov!=null?ov:auto;const diff=g.amount-(nonSav+sav);
+    const rows=al.map((item,i)=>`<div class="al-row"><input type="text" placeholder="e.g. Savings" value="${(item.l||'').replace(/"/g,'&quot;')}" oninput="updBdayAlL('${g.id}',${i},this.value,true)" onblur="updBdayAlL('${g.id}',${i},this.value,false)"/><div class="aw"><span class="pre">$</span><input type="number" inputmode="decimal" step=".01" value="${item.a||''}" oninput="updBdayAlA('${g.id}',${i},this.value,true)" onblur="updBdayAlA('${g.id}',${i},this.value,false)"/></div><button class="del" onclick="delBdayAl('${g.id}',${i})">×</button></div>`).join('');
+    const savRow=`<div class="sv-row"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#4ade80;font-weight:600">→ Savings</span><span style="font-size:10px;color:var(--tx3)">${ov!=null?'(manual)':'(auto)'}</span></div><div style="display:flex;align-items:center;gap:6px"><div class="aw" style="width:100px"><span class="pre">$</span><input type="number" inputmode="decimal" step=".01" placeholder="${auto.toFixed(2)}" value="${ov!=null?ov:''}" style="color:#4ade80" oninput="updBdaySav('${g.id}',this.value,true)" onblur="updBdaySav('${g.id}',this.value,false)"/></div></div></div>`;
+    bdayH+=`<div class="bday-card" style="border-top:1px solid ${isChk?'#166534':'#1e3a5f'}"><div class="bday-chk${isChk?' on':''}" onclick="togBday('${g.id}')">${isChk?'<span style="color:white;font-size:14px">✓</span>':''}</div><div class="bday-con"><div style="font-size:13px;font-weight:600;color:${isChk?'#4ade80':'var(--tx)'}">${g.label}</div><div style="font-size:15px;font-weight:800;font-family:'Syne',sans-serif;color:#fbbf24;margin-top:2px">$${g.amount}</div>${isChk?`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--tx3)">Work date:</span><input type="date" value="${chk.workDate||''}" style="padding:3px 6px;font-size:11px;border-radius:6px;border:1px solid var(--bd2);background:#0e1520;color:var(--tx);outline:none" onchange="updBdayD('${g.id}','workDate',this.value)"/></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:${isPend?'#fbbf24':'#4ade80'}">Pay date:</span><input type="date" value="${chk.payDate||''}" style="padding:3px 6px;font-size:11px;border-radius:6px;border:1px solid ${isPend?'#92400e':'var(--bd2)'};background:${isPend?'#1c1200':'#0e1520'};color:var(--tx);outline:none" onchange="updBdayD('${g.id}','payDate',this.value)"/><span style="font-size:9px;background:${isPend?'#92400e':'#0d2010'};color:${isPend?'#fbbf24':'#4ade80'};padding:1px 6px;border-radius:4px;font-weight:700">${isPend?'PENDING':'RECEIVED'}</span></div></div><div class="al-tog" style="margin:8px -14px 0;padding:8px 14px" onclick="tog('al_bday_${g.id}')"><div class="al-lbl"><span class="arr${alOpen?' o':''}">&#9654;</span>Where this money goes</div><span class="al-st" style="color:${Math.abs(diff)<.01?'#16a34a':diff<0?'var(--red)':'#f59e0b'}">${Math.abs(diff)<.01?'Fully allocated':diff>0?fmt(diff)+' unallocated':'−'+fmt(Math.abs(diff))+' over'}</span></div>${alOpen?`<div style="margin:0 -14px;padding:0 14px 8px;background:var(--bg3)">${rows}<div class="al-foot"><button class="add-al" onclick="addBdayAl('${g.id}')">+ Add allocation</button><div style="font-size:12px;color:var(--tx3)">Non-sav: <b>${fmt(nonSav)}</b></div></div>${savRow}</div>`:''}`:''}
+    </div></div>`;
+  });
+  bdayH+=`</div>`;
 
-
-    const totalPaysByAug=pp.filter(p=>!p.pending).reduce((s,p)=>s+p.gross,0);
-    cardsHtml+=`<div class="cashflow" style="margin-top:8px">
-      <div class="cf-title">Cash Flow Summary</div>
-      <div class="cf-row"><span>Starting savings</span><span>${fmt(START_BAL)}</span></div>
-      <div class="cf-row"><span>Paychecks by Aug 31 (scheduled)</span><span>${fmt(totalPaysByAug)}</span></div>
-      ${standaloneTotal>0?`<div class="cf-row" style="color:#f59e0b"><span>Extra standalone payments</span><span>+${fmt(standaloneTotal)}</span></div>`:''}
-      <div class="cf-row" style="color:var(--red)"><span>Paycheck deductions (p0)</span><span>−${fmt(p0NonSavings)}</span></div>
-      <div class="cf-row" style="color:var(--red)"><span>Total expenses (all months)</span><span>−${fmts(totalExpenses)}</span></div>
-      <div class="cf-row total"><span>Projected in account Aug 31</span><span style="color:var(--green)">${fmts(projBalAug31)}</span></div>
-      <div class="cf-row pending-row"><span>+ Sep paycheck (pending)</span><span>+${fmts(pendingAmt)}</span></div>
-      <div class="cf-row true-total"><span>True total once all paid</span><span>${fmts(projBalTotal)}</span></div>
-    </div>`;
-
-    payHtml=`<div class="pay-list">${cardsHtml}</div>`;
+  // Paycheck
+  const payOpen=state.ui.pay;let payH='';
+  if(payOpen){
+    let cards='';
+    pp.forEach(p=>{
+      const st2=p.pending?"pe":p.rcvd?"rc":"up";const stLbl=p.pending?"Pending (Sep)":p.rcvd?"Received":"Upcoming";
+      const act=state.payActual[p.id]??null;const projAmt=p.fixed?p.gross:(p.projGross||p.gross);const disp2=act!=null?act:projAmt;const base=act!=null?act:disp2;const hasRcvd=act!=null;const rdiff=hasRcvd?act-p.gross:null;
+      const expDeds=expDedByPid[p.id]||[];
+      let src='';if(p.fixed)src='<span style="color:var(--tx3)">Prior period paycheck</span>';else{if(p.bcN>0)src+=`<span style="color:#3b82f6;font-weight:600">BC: ${p.bcN}d = ${fmt(p.bcA)}</span>`;if(p.mlN>0)src+=`<span style="color:#22c55e;font-weight:600">ML: ${p.mlN}d = ${fmt(p.mlA)}</span>`;if(p.frN>0)src+=`<span style="color:#f59e0b;font-weight:600">FR: ${p.frN}d = ${fmt(p.frA)}</span>`;}
+      cards+=`<div class="pay-card"><div class="pay-hd ${st2}"><div><div class="pay-ti">${p.label}</div><div class="pay-de">${p.desc}</div></div><div style="text-align:right"><span class="pay-badge ${st2}">${stLbl}</span><div class="pay-gr" style="color:${hasRcvd?'#4ade80':'inherit'}">${fmt(disp2)}</div></div></div><div class="pay-src">${src}</div>
+      <div class="pay-rv"><span style="font-size:11px;color:var(--tx3);white-space:nowrap;flex-shrink:0">Actual received:</span><div style="position:relative;flex:1;max-width:130px"><span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--tx3);pointer-events:none">$</span>
+        <input type="number" inputmode="decimal" step=".01" placeholder="${p.gross.toFixed(0)}" value="${hasRcvd?act:''}" style="width:100%;padding:5px 6px 5px 18px;font-size:13px;border-radius:7px;border:1px solid ${hasRcvd?'#4ade8055':'var(--bd2)'};background:${hasRcvd?'#0d2010':'#0e1520'};color:var(--tx);outline:none;font-family:'DM Mono',monospace;box-sizing:border-box"
+          oninput="setPayAct('${p.id}',this.value,true)" onblur="setPayAct('${p.id}',this.value,false)"/>
+      </div>${rdiff!=null?`<span style="font-size:11px;font-weight:700;color:${rdiff>=0?'#4ade80':'var(--red)'}">${rdiff>=0?'+':'−'}${fmt(Math.abs(rdiff))}</span>`:''}${hasRcvd?'<span style="font-size:10px;background:#0d2010;color:#4ade80;padding:2px 7px;border-radius:6px;font-weight:600">✓ Logged</span>':'<span style="font-size:10px;color:var(--tx3)">enter when paid</span>'}</div>
+      ${allocBlock(p.id,state.alloc,state.allocSav,base,'addAl','updAlL','updAlA','delAl','updAlSav',expDeds)}</div>`;
+    });
+    const totPayByAug=pp.filter(p=>!p.pending).reduce((s,p)=>s+p.gross,0);
+    cards+=`<div class="cashflow"><div style="font-weight:700;margin-bottom:8px;color:var(--tx2)">Cash Flow Summary</div><div class="cfr"><span>Starting savings</span><span>${fmt(START)}</span></div><div class="cfr"><span>Paychecks by Aug 31 (scheduled)</span><span>${fmt(totPayByAug)}</span></div><div class="cfr" style="color:var(--red)"><span>Deductions (Apr paycheck)</span><span>−${fmt(p0non)}</span></div><div class="cfr" style="color:var(--red)"><span>Total expenses</span><span>−${fmts(totExp)}</span></div><div class="cfr tot"><span>Projected Aug 31</span><span style="color:var(--grn)">${fmts(projBal)}</span></div><div class="cfr pe"><span>+ Sep paycheck</span><span>+${fmts(pendAmt)}</span></div><div class="cfr tr"><span>True total once all paid</span><span>${fmts(projBal+pendAmt)}</span></div></div>`;
+    payH=`<div class="pay-list">${cards}</div>`;
   }
 
-  // ── Expenses ──
-  let expMonthsHtml='';
-  BASE_EXP_DATES.forEach(d=>{
-    const mk=d.slice(0,7);
-    const past=d<=today;
-    const mo=MN[parseInt(d.slice(5,7))-1];
-    const extras=(expExtra[mk]||[]);
-    const gasAmt=(expGas||{})[mk]??EXP_GAS_DEFAULT;
-    const extraTotal=extras.reduce((s,e)=>s+(e.a||0),0);
-    const monthTotal=EXP_NET+extraTotal;
-
-    // Expense math: total outgoing = insurance + gas + emergency + fun = ~$370
-    // $130 received monthly offsets it → net out-of-pocket = $240
-    // fun money = $240 - insurance - gas - emergency (what's left after fixed costs)
-    const funMoney=Math.max(0,EXP_NET-EXP_INSURANCE-gasAmt-EXP_EMERGENCY);
-    const totalOutgoing=EXP_INSURANCE+gasAmt+EXP_EMERGENCY+funMoney; // ~370
-    expMonthsHtml+=`<div class="exp-month-card">
-      <div class="exp-month-header">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:13px;font-weight:700;color:${past?'#4ade80':'var(--txt)'}">${mo}</span>
-          ${past?'<span style="font-size:10px;background:#0d2010;color:#4ade80;padding:1px 7px;border-radius:6px;font-weight:600">✓ Paid</span>':''}
-        </div>
-        <span style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:${past?'#4ade80':'var(--txt)'}">Net: $240</span>
-      </div>
-
-      <!-- Clean line-item list -->
-      <div style="font-size:12px">
-
-        <!-- Car insurance -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-          <span style="color:var(--txt2)">Car insurance</span>
-          <span style="font-family:'DM Mono',monospace;font-weight:600">${fmt(EXP_INSURANCE)}</span>
-        </div>
-
-        <!-- Gas — editable -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-          <span style="color:var(--txt2)">Gas <span style="font-size:10px;color:var(--txt3)">(edit)</span></span>
-          <div style="position:relative;width:80px">
-            <span style="position:absolute;left:7px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt3);pointer-events:none">$</span>
-            <input class="exp-input" type="number" inputmode="decimal" placeholder="${EXP_GAS_DEFAULT}" value="${gasAmt!==EXP_GAS_DEFAULT?gasAmt:''}"
-              style="width:100%;padding:4px 6px 4px 16px;font-size:12px;text-align:right;border-radius:6px"
-              oninput="updExpGasSoft('${mk}',this.value)"
-              onblur="updExpGas('${mk}',this.value)"
-              onchange="updExpGas('${mk}',this.value)"/>
-          </div>
-        </div>
-
-        <!-- Emergency -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-          <span style="color:var(--txt2)">Emergency / checking</span>
-          <span style="font-family:'DM Mono',monospace;font-weight:600">${fmt(EXP_EMERGENCY)}</span>
-        </div>
-
-        <!-- Running subtotal before fun money -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.15);margin:0 -14px;padding-left:14px;padding-right:14px">
-          <span style="font-size:11px;color:var(--txt3)">Subtotal so far</span>
-          <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--txt3)">${fmt(EXP_INSURANCE+gasAmt+EXP_EMERGENCY)}</span>
-        </div>
-
-        <!-- Fun money — highlighted -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <div>
-            <span style="color:var(--txt);font-weight:600">Fun money 🎉</span>
-            <div style="font-size:10px;color:var(--txt3);margin-top:1px">$240 − insurance − gas − emergency</div>
-          </div>
-          <span style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:#a5b4fc">${fmt(funMoney)}</span>
-        </div>
-
-        <!-- $130 received offset note -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)">
-          <span style="font-size:11px;color:var(--txt3)">Monthly car contribution (received)</span>
-          <span style="font-size:11px;font-family:'DM Mono',monospace;color:#4ade80">−$130.00</span>
-        </div>
-
-        <!-- Total outgoing context -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-          <span style="font-size:11px;color:var(--txt3)">Total outgoing (before offset)</span>
-          <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--txt3)">${fmt(totalOutgoing)}</span>
-        </div>
-
-        <!-- Net -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0">
-          <span style="font-weight:700;color:${past?'#4ade80':'var(--txt)'}">Net out-of-pocket (${mo} 7)</span>
-          <span style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:${past?'#4ade80':'var(--txt)'}">$240.00</span>
-        </div>
-
-      </div>
-      ${extras.map((ex,i)=>`<div class="exp-extra-row">
-        <input type="text" placeholder="Extra expense label" value="${(ex.l||'').replace(/"/g,'&quot;')}"
-          style="flex:1;min-width:0;padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none"
-          onchange="updExpExtraLabel('${mk}',${i},this.value)" oninput="updExpExtraLabel('${mk}',${i},this.value)"/>
-        <div style="position:relative;width:90px;flex-shrink:0">
-          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none">$</span>
-          <input class="exp-input" type="number" inputmode="decimal" placeholder="0" value="${ex.a||''}"
-            style="width:100%;padding:4px 6px 4px 18px;text-align:right"
-            onchange="updExpExtraAmt('${mk}',${i},this.value)" oninput="updExpExtraAmt('${mk}',${i},this.value)"/>
-        </div>
-        <button class="del-btn" onclick="delExpExtra('${mk}',${i})">×</button>
-      </div>`).join('')}
-      <button onclick="addExpExtra('${mk}')"
-        style="font-size:11px;background:none;color:var(--txt3);border:1px dashed var(--border);padding:3px 10px;border-radius:6px;cursor:pointer;margin-top:4px">
-        + Add extra expense
-      </button>
-    </div>`;
+  // Expenses
+  let expH='';
+  EXP_DATES.forEach(d=>{
+    const mk=d.slice(0,7);const past=d<=td2;const mo=MN[parseInt(d.slice(5,7))-1];
+    const ev=getEV(mk);const extras=state.expEx[mk]||[];const extTot=extras.reduce((s,e)=>s+(e.a||0),0);const totNet=ev.net+extTot;
+    function ed(field,val,def){const ch=val!==def;return`<div class="exp-ed"><span class="pre">$</span><input type="number" inputmode="decimal" step=".01" placeholder="${def}" value="${ch?val:''}" style="border-color:${ch?'var(--ac)':'var(--bd2)'}" oninput="setExpF('${mk}','${field}',this.value,true)" onblur="setExpF('${mk}','${field}',this.value,false)"/></div>`;}
+    expH+=`<div class="exp-mo"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:700;color:${past?'#4ade80':'var(--tx)'}">${mo}</span>${past?'<span style="font-size:10px;background:#0d2010;color:#4ade80;padding:1px 7px;border-radius:6px;font-weight:600">✓ Paid</span>':''}</div><span style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:${past?'#4ade80':'var(--tx)'}">${fmt(totNet)} net</span></div>
+    <div class="exp-row"><span style="color:var(--tx2);font-weight:600">Total monthly outgoing</span>${ed('total',ev.tot,EXP_TOT)}</div>
+    <div class="exp-row grn"><span>− Received (car contribution)</span><span style="font-family:'DM Mono',monospace;font-weight:600">−$${EXP_RCV}.00</span></div>
+    <div class="exp-row sh"><span>Breakdown</span></div>
+    <div class="exp-row"><div><div style="color:var(--tx2)">Car insurance <span style="font-size:10px;color:var(--tx3)">(full bill)</span></div><div style="font-size:11px;color:var(--tx3)">Net after $${EXP_RCV}: <span style="color:#94a3b8">${fmt(ev.ins-EXP_RCV)}</span></div></div>${ed('ins',ev.ins,EXP_INS)}</div>
+    <div class="exp-row"><span style="color:var(--tx2)">Gas</span>${ed('gas',ev.gas,EXP_GAS)}</div>
+    <div class="exp-row"><span style="color:var(--tx2)">Emergency / checking</span>${ed('emg',ev.emg,EXP_EMG)}</div>
+    <div class="fun-row"><div><div style="font-weight:700">Fun money 🎉</div><div style="font-size:10px;color:var(--tx3)">${ev.tot}−${ev.ins}−${ev.gas}−${ev.emg}</div></div><span style="font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:${ev.fun<0?'var(--red)':'#a5b4fc'}">${fmt(ev.fun)}</span></div>
+    ${extras.map((ex,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-top:5px"><input class="ti" type="text" placeholder="Extra expense" value="${(ex.l||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:0" oninput="updExpExL('${mk}',${i},this.value,true)" onblur="updExpExL('${mk}',${i},this.value,false)"/><div class="nw"><span class="pre">$</span><input class="ni" type="number" inputmode="decimal" placeholder="0" value="${ex.a||''}" style="width:90px" oninput="updExpExA('${mk}',${i},this.value,true)" onblur="updExpExA('${mk}',${i},this.value,false)"/></div><button class="del" onclick="delExpEx('${mk}',${i})">×</button></div>`).join('')}
+    <button onclick="addExpEx('${mk}')" style="font-size:11px;background:none;color:var(--tx3);border:1px dashed var(--bd);padding:3px 10px;border-radius:6px;cursor:pointer;margin-top:6px">+ Add extra expense</button></div>`;
   });
 
-  // ── Extra Payments standalone section ──
-  let xpSectionHtml='';
-  {
-    const xpOpen=ui.xp;
-    const standaloneTotal=(extraPay||[]).filter(x=>x.type==="standalone").reduce((s,x)=>s+(x.amount||0),0);
-    xpSectionHtml=`<div style="margin-bottom:16px">
-      <div class="section-toggle" onclick="toggle('xp')" style="padding:8px 4px">
-        <span class="toggle-arrow${xpOpen?' open':''}">&#9654;</span>
-        <h2 style="font-size:13px;color:var(--txt2)">Extra / Freelance Payments</h2>
-        ${standaloneTotal>0?`<span style="font-size:11px;color:#f59e0b;margin-left:auto">${fmts(standaloneTotal)} standalone</span>`:''}
-      </div>
-      ${xpOpen?`
-      ${(extraPay||[]).map(xp=>{
-        const xpBase=xp.amount||0;
-        const xpAllocNonSav=((xp.alloc||[]).reduce((s,a)=>s+(a.a||0),0));
-        const xpAutoSav=Math.max(0,xpBase-xpAllocNonSav);
-        const xpSavOverride=xp.allocSavings;
-        const xpSav=xpSavOverride!==null&&xpSavOverride!==undefined?xpSavOverride:xpAutoSav;
-        const xpAllocOpen=ui["al_xp_"+xp.id];
-        const xpDiff=xpBase-(xpAllocNonSav+xpSav);
-
-        const xpRowsHtml=(xp.alloc||[]).map((item,i)=>`<div class="alloc-row">
-          <input type="text" placeholder="e.g. Savings" value="${(item.l||'').replace(/"/g,'&quot;')}"
-            onchange="updExtraPayAllocLabel('${xp.id}',${i},this.value)" oninput="updExtraPayAllocLabel('${xp.id}',${i},this.value)"/>
-          <div class="alloc-amt-wrap"><span class="prefix">$</span>
-            <input type="number" inputmode="decimal" step="0.01" value="${item.a||''}"
-              onchange="updExtraPayAllocAmt('${xp.id}',${i},this.value)" oninput="updExtraPayAllocAmt('${xp.id}',${i},this.value)"/>
-          </div>
-          <button class="del-btn" onclick="delExtraPayAlloc('${xp.id}',${i})">×</button>
-        </div>`).join('');
-
-        const xpSavInputVal=xpSavOverride!==null&&xpSavOverride!==undefined?xpSavOverride:'';
-        const xpSavRow=`<div class="alloc-savings-row">
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:12px;color:#4ade80;font-weight:600">→ Savings</span>
-            <span style="font-size:10px;color:var(--txt3)">${xpSavOverride!==null&&xpSavOverride!==undefined?'(manual)':'(auto)'}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div class="alloc-amt-wrap" style="width:100px"><span class="prefix">$</span>
-              <input type="number" inputmode="decimal" step="0.01"
-                placeholder="${xpAutoSav.toFixed(2)}" value="${xpSavInputVal}"
-                style="color:#4ade80;border-color:${xpSavOverride!==null&&xpSavOverride!==undefined?'#4ade8055':'var(--border2)'}"
-                onchange="updExtraPaySavings('${xp.id}',this.value)"
-                oninput="updExtraPaySavingsSoft('${xp.id}',this.value)"
-                onblur="updExtraPaySavings('${xp.id}',this.value)"/>
-            </div>
-            ${xpSavOverride!==null&&xpSavOverride!==undefined?`<button onclick="updExtraPaySavings('${xp.id}','')" style="font-size:9px;padding:1px 5px;border-radius:4px;border:1px solid var(--border2);background:none;color:var(--txt3);cursor:pointer">auto</button>`:''}
-          </div>
-        </div>`;
-
-        return`<div class="extra-pay-card">
-          <div class="extra-pay-header">
-            <span class="xp-badge ${xp.type==='standalone'?'standalone':'topaycheck'}">${xp.type==='standalone'?'Standalone':'→ Paycheck'}</span>
-            <input type="text" placeholder="Label (e.g. Dog walking)" value="${(xp.label||'').replace(/"/g,'&quot;')}"
-              style="flex:1;min-width:0;padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid #3d2e0a;background:#0e1520;color:var(--txt);outline:none"
-              onchange="updExtraPay('${xp.id}','label',this.value)" oninput="updExtraPaySoft('${xp.id}','label',this.value)"/>
-            <button class="del-btn" onclick="delExtraPay('${xp.id}')">×</button>
-          </div>
-          <div style="padding:10px 14px;background:var(--bg2);display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid #3d2e0a">
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:11px;color:var(--txt3)">Date:</span>
-              <input type="date" value="${xp.date||''}"
-                style="padding:3px 6px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none"
-                onchange="updExtraPay('${xp.id}','date',this.value)"/>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:11px;color:var(--txt3)">Amount:</span>
-              <div style="position:relative">
-                <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none">$</span>
-                <input type="number" inputmode="decimal" step="0.01" placeholder="0" value="${xp.amount||''}"
-                  style="width:100px;padding:3px 6px 3px 18px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none;font-family:'DM Mono',monospace"
-                  oninput="updExtraPaySoft('${xp.id}','amount',this.value)"
-                  onblur="updExtraPay('${xp.id}','amount',this.value)"
-                  onchange="updExtraPay('${xp.id}','amount',this.value)"/>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:11px;color:var(--txt3)">Type:</span>
-              <select onchange="updExtraPay('${xp.id}','type',this.value)"
-                style="padding:3px 6px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:#0e1520;color:var(--txt);outline:none">
-                <option value="standalone" ${xp.type==='standalone'?'selected':''}>Standalone</option>
-                <option value="topaycheck" ${xp.type==='topaycheck'?'selected':''}>Add to pay period</option>
-              </select>
-            </div>
-          </div>
-          <div class="pay-alloc-toggle" onclick="toggle('al_xp_${xp.id}')">
-            <div class="pay-alloc-label"><span class="toggle-arrow${xpAllocOpen?' open':''}">&#9654;</span>Where this money goes</div>
-            <span class="alloc-status" style="color:${Math.abs(xpDiff)<0.01?'#16a34a':xpDiff<0?'#ef4444':'#f59e0b'}">${Math.abs(xpDiff)<0.01?'Fully allocated':xpDiff>0?fmt(xpDiff)+' unallocated':'−'+fmt(Math.abs(xpDiff))+' over'}</span>
-          </div>
-          ${xpAllocOpen?`<div class="alloc-body">
-            ${xpRowsHtml}
-            <div class="alloc-footer" style="margin-bottom:0">
-              <button class="add-alloc-btn" onclick="addExtraPayAlloc('${xp.id}')">+ Add allocation</button>
-              <div class="alloc-totals">Non-savings: <b>${fmt(xpAllocNonSav)}</b></div>
-            </div>
-            ${xpSavRow}
-          </div>`:''}
-        </div>`;
-      }).join('')}
-      <button class="add-xp-btn" onclick="addExtraPay()">+ Add Extra Payment</button>
-      `:''}
-    </div>`;
-  }
-
-  // ── Full DOM ──
-  document.getElementById('app').innerHTML=`
-    <div class="dash">
-      <div class="dash-header">
-        <div><h1>Summer 2026 Savings</h1><div class="dash-sub">Gap Year Fund &bull; Apr 16 – Aug 31</div></div>
-        <div class="days-logged">Days logged<b class="mono">${[...enteredDays].length} / ${allDays.length}</b></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:7px 10px;background:rgba(0,0,0,0.25);border-radius:8px;border:1px solid var(--border)">
-        <span id="sync-status" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--txt3)">Sync ready</span>
-        <button onclick="manualSync()" style="font-size:11px;background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);padding:3px 10px;border-radius:6px;cursor:pointer">↕ Sync now</button>
-      </div>
-      ${paceHtml}
-      <div class="bar-wrap">
-        <div class="bar-labels"><span>Account balance → $5,500</span><span>${fmts(curBal)} now</span></div>
-        <div class="bar-bg"><div class="bar-fill${pct>=100?' done':''}" style="width:${pct}%"></div></div>
-        <div class="bar-pct">${Math.round(pct)}% of primary goal</div>
-      </div>
-      <div class="stat-grid">
-        <div class="stat-card"><div class="stat-label">Total Earned</div><div class="stat-val">${fmts(totalAct)}</div><div class="stat-sub">of ${fmts(totalExpAll)} planned</div></div>
-        <div class="stat-card"><div class="stat-label">Account Balance</div><div class="stat-val" style="color:${curBal>=5500?'#4ade80':'#fbbf24'}">${fmts(curBal)}</div><div class="stat-sub">cash in hand today</div></div>
-        <div class="stat-card"><div class="stat-label">Projected Aug 31</div><div class="stat-val" style="color:${projBalAug31>=5500?'#4ade80':'#fbbf24'}">${fmts(projBalAug31)}</div><div class="stat-sub" style="color:${surplus>=0?'#4ade80':'#f87171'}">${surplus>=0?'+'+fmts(surplus)+' surplus':'−'+fmts(Math.abs(surplus))+' short'}</div></div>
-        <div class="stat-card"><div class="stat-label">Still Need to Earn</div><div class="stat-val">${fmts(remainToEarn)}</div><div class="stat-sub">to guarantee $5,500</div></div>
-      </div>
-      ${pendingAmt>0?`<div class="sep-note">+${fmts(pendingAmt)} arriving in September → total: <b>${fmts(projBalTotal)}</b></div>`:''}
+  const depsCnt=(state.deps||[]).filter(d=>d.dateSent&&d.dateSent<=td2).length;
+  return`<div class="dash">
+    <div class="dash-hd"><div><h1>Managing Money</h1><div class="dash-sub">Savings Account &bull; Apr 16 – Aug 31</div></div><div class="dc">Deposits made<b>${depsCnt} logged</b></div></div>
+    ${mkPaceHtml(aheadBehind,entered,frByDate,false)}
+    <div class="bar-wrap">
+      <div class="bar-lbl"><span>True savings balance → $5,500</span><span style="font-family:'DM Mono',monospace;font-weight:700;color:#4ade80">${fmts(tsb)}</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${tsb>=GHIGH?'linear-gradient(90deg,#22c55e,#4ade80)':tsb>=GTGT?'linear-gradient(90deg,#3b82f6,#22c55e)':tsb>=GMIN?'linear-gradient(90deg,#6366f1,#3b82f6)':'linear-gradient(90deg,#f59e0b,#6366f1)'}"></div></div>
+      <div style="font-size:10px;color:var(--tx3);text-align:right;margin-top:3px">${Math.round(pct)}% of $5,500 · updates only on actual deposits</div>
     </div>
-
-    <!-- Cumulative chart — always visible -->
-    <div class="chart-wrap">
-      <div class="chart-title">
-        <span>Cumulative Earnings vs Goal</span>
-        <div class="chart-legend">
-          <div class="chart-legend-item"><div class="chart-legend-line" style="background:#6366f1"></div>Expected</div>
-          <div class="chart-legend-item"><div class="chart-legend-line" style="background:#4ade80"></div>Actual (ahead)</div>
-          <div class="chart-legend-item"><div class="chart-legend-line" style="background:#ef4444"></div>Actual (behind)</div>
-          <div class="chart-legend-item" style="gap:4px"><div style="width:16px;border-top:2px dashed #fbbf24"></div>$5,500</div>
-        </div>
+    <div class="sg">
+      <div class="sc"><div class="sc-l">True Savings Balance</div><div class="sc-v" style="color:${tsb>=GMIN?'#4ade80':'#fbbf24'}">${fmts(tsb)}</div><div class="sc-s">from actual deposits only</div></div>
+      <div class="sc"><div class="sc-l">Projected Aug 31</div><div class="sc-v" style="color:${projBal>=GMIN?'#4ade80':'#fbbf24'}">${fmts(projBal)}</div><div class="sc-s" style="color:${surplus>=0?'#4ade80':'var(--red)'}">+${fmts(surplus)} vs $5,500</div></div>
+      <div class="sc"><div class="sc-l">Expenses Paid</div><div class="sc-v">${fmts(expPaid)}</div><div class="sc-s">of ${fmts(totExp)} total</div></div>
+      <div class="sc"><div class="sc-l">Still Need to Save</div><div class="sc-v">${fmts(Math.max(0,GMIN-tsb))}</div><div class="sc-s">based on true balance</div></div>
+    </div>
+    ${pendAmt>0?`<div class="sep-note">+${fmts(pendAmt)} arriving Sep → total: <b>${fmts(projBal+pendAmt)}</b></div>`:''}
+  </div>
+  <div class="cw">
+    <div class="ct">
+      <span>Savings Balance Over Time</span>
+      <div class="cl">
+        ${mc==='deps'||mc==='both'?`<div class="cl-i"><div style="width:16px;height:2px;background:#4ade80;border-radius:1px"></div>Deposits</div><div class="cl-i"><div style="width:8px;height:8px;border-radius:50%;background:#fbbf24"></div>Deposit event</div>`:''}
+        ${mc==='work'||mc==='both'?`<div class="cl-i"><div style="width:16px;height:2px;background:#6366f1;border-radius:1px"></div>Expected</div><div class="cl-i"><div style="width:16px;height:2px;background:#34d399;border-radius:1px"></div>Actual work</div>`:''}
+        <select class="chart-sel" onchange="setManChart(this.value)"><option value="deps"${mc==='deps'?' selected':''}>Actual Deposits</option><option value="work"${mc==='work'?' selected':''}>Work vs Expected</option><option value="both"${mc==='both'?' selected':''}>Both Overlaid</option></select>
       </div>
-      <canvas id="chart-cumulative" height="160"></canvas>
     </div>
-
-    <!-- Weekly chart — always visible -->
-    <div class="chart-wrap">
-      <div class="chart-title">
-        <span>Weekly Earnings: Goal vs Actual</span>
-        <div class="chart-legend">
-          <div class="chart-legend-item"><div style="width:8px;height:8px;border-radius:2px;background:#1e3a5f;border:1px solid #3b82f6"></div>Goal</div>
-          <div class="chart-legend-item"><div style="width:8px;height:8px;border-radius:2px;background:#4ade80"></div>At/above</div>
-          <div class="chart-legend-item"><div style="width:8px;height:8px;border-radius:2px;background:#fb923c"></div>Below</div>
-        </div>
-      </div>
-      <canvas id="chart-weekly" height="150"></canvas>
-    </div>
-
-    <div class="section-toggle" onclick="toggle('pay')">
-      <span class="toggle-arrow${ui.pay?' open':''}">&#9654;</span>
-      <h2>Paycheck Schedule &amp; Allocations</h2>
-    </div>
-    ${payHtml}
-    ${xpSectionHtml}
-
-    <div class="legend">
-      <span class="legend-pill" style="background:#1e3a5f;color:#3b82f6"><span class="legend-dot" style="background:#3b82f6"></span>Boulder County</span>
-      <span class="legend-pill" style="background:#14391f;color:#22c55e"><span class="legend-dot" style="background:#22c55e"></span>Mobile Lab</span>
-      <span class="legend-pill" style="background:#3d2e0a;color:#f59e0b"><span class="legend-dot" style="background:#f59e0b"></span>Freelance</span>
-      <span class="legend-pill" style="background:#1e2a38;color:#64748b"><span class="legend-dot" style="background:#64748b"></span>Off</span>
-      <span class="legend-pill" style="background:#141e2e;color:#475569"><span class="legend-dot" style="background:#475569"></span>Weekend</span>
-    </div>
-    ${weeksHtml}
-
-    <div class="expenses-box">
-      <div class="expenses-header">
-        <span class="exp-label">Monthly Expenses</span>
-        <span style="font-size:12px;color:var(--txt3)">${fmts(expPaid)} of ${fmts(totalExpenses)} paid</span>
-      </div>
-      ${expMonthsHtml}
-    </div>
-
-    <div class="reset-wrap"><button class="reset-btn" onclick="resetAll()">Reset All Data</button></div>
-  `;
-
-  // Draw charts
-  // Small delay ensures DOM layout is complete before reading canvas dimensions
-  setTimeout(()=>{
-    drawCumulativeChart(allDays,act,extraPay,today);
-    drawWeeklyChart(weeks,act,xpByDate);
-  },50);
-
-  if(!Object.keys(ui).some(k=>k.startsWith('w'))){
-    const el=document.querySelector('.current-week');
-    if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),100);
-  }
+    <canvas id="csav" height="200"></canvas>
+  </div>
+  ${depsH}${bdayH}
+  <div class="sec-hd" onclick="tog('pay')"><span class="arr${payOpen?' o':''}">&#9654;</span>Paycheck Schedule &amp; Allocations</div>${payH}
+  <div class="exp-box"><div class="exp-bh"><span style="font-size:13px;font-weight:700;color:var(--tx2)">Monthly Expenses</span><span style="font-size:12px;color:var(--tx3)">${fmts(expPaid)} of ${fmts(totExp)} paid</span></div>${expH}</div>
+  <div class="rst"><button class="rst-btn" onclick="resetAll()">Reset All Data</button></div>`;
 }
 
-// ─── CHARTS ───────────────────────────────────────────────────────────────────
-function getCtx(id){
-  const canvas=document.getElementById(id);if(!canvas)return null;
-  const dpr=window.devicePixelRatio||1;
-  const h=parseInt(canvas.getAttribute('height'))||160;
-  // Reset width so layout recalculates, then read from parent container
-  canvas.style.width='100%';
-  canvas.style.height=h+'px';
-  const w=canvas.parentElement?canvas.parentElement.clientWidth||canvas.offsetWidth||340:canvas.offsetWidth||340;
-  canvas.width=w*dpr;canvas.height=h*dpr;
-  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx._w=w;ctx._h=h;return ctx;
-}
+// ── CHARTS ─────────────────────────────────────────────────────────────
+function getCtx(id){const c=document.getElementById(id);if(!c)return null;const dpr=window.devicePixelRatio||1,h=parseInt(c.getAttribute('height'))||160;c.style.width='100%';c.style.height=h+'px';const w=c.parentElement?c.parentElement.clientWidth||340:340;c.width=w*dpr;c.height=h*dpr;const ctx=c.getContext('2d');ctx.scale(dpr,dpr);ctx._w=w;ctx._h=h;return ctx;}
+function rr(ctx,x,y,w,h,r){try{ctx.roundRect(x,y,w,h,r);}catch(e){ctx.rect(x,y,w,h);}}
 
-function drawCumulativeChart(allDays,act,extraPay,today){
-  const ctx=getCtx('chart-cumulative');if(!ctx)return;
-  const W=ctx._w,H=ctx._h,PAD={t:16,r:18,b:28,l:52};
-  const cW=W-PAD.l-PAD.r,cH=H-PAD.t-PAD.b;
-  const todayIdx=allDays.findIndex(d=>d.ds===today);
-  const xpByDate=buildExtraPayByDate(extraPay);
-
-  let cumExp=0,cumAct=0;
-  const expLine=[],actLine=[];
-  allDays.forEach((d,i)=>{
-    cumExp+=d.e; expLine.push(cumExp);
-    if(i<=todayIdx){
-      cumAct+=(act[d.ds]||0)+(xpByDate[d.ds]||0);
-    }
-    actLine.push(i<=todayIdx?cumAct:null);
-  });
-
-  const maxVal=Math.max(cumExp,5500)*1.05;
+function drawCumChart(td){
+  const ctx=getCtx('cc');if(!ctx)return;const W=ctx._w,H=ctx._h,P={t:16,r:20,b:28,l:52};const cW=W-P.l-P.r,cH=H-P.t-P.b;
+  const mode=state.ui.earnChart||'work';
+  const fbd=wkFrByDate();const dbd=depsEarnedByDate();const bbd=bdayByDate();const ti=allDays.findIndex(d=>d.ds===td);
+  let ce=0,ca=0;const eL=[],aL=[];
+  allDays.forEach((d,i)=>{ce+=d.e;eL.push(ce);if(i<=ti)ca+=(state.act[d.ds]||0)+(fbd[d.ds]||0)+(dbd[d.ds]||0)+(bbd[d.ds]||0);aL.push(i<=ti?ca:null);});
+  const dL=depsCumLine();
+  const maxWork=Math.max(ce,GCAM);const maxDep=Math.max(...dL.filter(v=>v!=null),START);
+  const mx=Math.max(mode==='deps'?maxDep:maxWork,GMIN)*1.05;
   const n=allDays.length;
-  function xp(i){return PAD.l+(i/(n-1))*cW;}
-  function yp(v){return PAD.t+cH-(v/maxVal)*cH;}
-
-  ctx.fillStyle='#0e1520';ctx.beginPath();ctx.roundRect(0,0,W,H,8);ctx.fill();
-
-  // Grid
-  [0,0.25,0.5,0.75,1].forEach(f=>{
-    const y=yp(maxVal*f);
-    ctx.strokeStyle='#1e2d42';ctx.lineWidth=1;ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();
-    ctx.fillStyle='#475569';ctx.font='9px DM Mono,monospace';ctx.textAlign='right';
-    ctx.fillText('$'+Math.round(maxVal*f/1000)+'k',PAD.l-4,y+3);
-  });
-
-  // Month dividers
-  let prevMo=-1;
-  allDays.forEach((d,i)=>{
-    if(d.mo!==prevMo){prevMo=d.mo;
-      const x=xp(i);ctx.strokeStyle='#2a3a52';ctx.lineWidth=1;ctx.setLineDash([2,3]);
-      ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,H-PAD.b);ctx.stroke();ctx.setLineDash([]);
-      ctx.fillStyle='#475569';ctx.font='9px DM Sans,sans-serif';ctx.textAlign='center';
-      ctx.fillText(['Apr','May','Jun','Jul','Aug'][d.mo-3]||'',x,H-PAD.b+14);
-    }
-  });
-
-  // $5500 goal line
-  const goalY=yp(5500);
-  ctx.strokeStyle='#fbbf24';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
-  ctx.beginPath();ctx.moveTo(PAD.l,goalY);ctx.lineTo(W-PAD.r,goalY);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#fbbf24';ctx.font='bold 9px DM Mono,monospace';ctx.textAlign='right';
-  ctx.fillText('$5,500',W-PAD.r-2,goalY-4);
-
-  // Expected line (indigo)
-  ctx.strokeStyle='#6366f1';ctx.lineWidth=2;ctx.setLineDash([]);
-  ctx.beginPath();expLine.forEach((v,i)=>i===0?ctx.moveTo(xp(i),yp(v)):ctx.lineTo(xp(i),yp(v)));ctx.stroke();
-
-  // Actual line — colour by whether it's above or below expected
-  const pts=actLine.map((v,i)=>v!==null?{x:xp(i),y:yp(v),v,exp:expLine[i]}:null).filter(Boolean);
-  if(pts.length>1){
-    // Draw segment by segment, coloring green if actual>=expected, red if below
-    for(let i=1;i<pts.length;i++){
-      const p0=pts[i-1],p1=pts[i];
-      const ahead=p1.v>=p1.exp;
-      ctx.strokeStyle=ahead?'#4ade80':'#ef4444';
-      ctx.lineWidth=2.5;ctx.setLineDash([]);
-      ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);ctx.stroke();
-    }
-    // Gradient fill
-    const grad=ctx.createLinearGradient(0,PAD.t,0,H-PAD.b);
-    const lastPt=pts[pts.length-1];
-    const lastAhead=lastPt.v>=lastPt.exp;
-    grad.addColorStop(0,lastAhead?'rgba(74,222,128,0.15)':'rgba(239,68,68,0.12)');
-    grad.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=grad;ctx.beginPath();
-    ctx.moveTo(pts[0].x,H-PAD.b);pts.forEach(p=>ctx.lineTo(p.x,p.y));
-    ctx.lineTo(pts[pts.length-1].x,H-PAD.b);ctx.closePath();ctx.fill();
-    // End dot
-    ctx.fillStyle=lastAhead?'#4ade80':'#ef4444';
-    ctx.beginPath();ctx.arc(lastPt.x,lastPt.y,4,0,Math.PI*2);ctx.fill();
+  function xp(i){return P.l+(i/(n-1))*cW;}function yp(v){return P.t+cH-(v/mx)*cH;}
+  ctx.fillStyle='#0e1520';ctx.beginPath();rr(ctx,0,0,W,H,8);ctx.fill();
+  if(mode!=='deps'){ctx.fillStyle='rgba(34,197,94,.06)';ctx.fillRect(P.l,yp(GCAM),cW,yp(GHIGH)-yp(GCAM));}
+  [0,.2,.4,.6,.8,1].forEach(f=>{const y=yp(mx*f);ctx.strokeStyle='#1e2d42';ctx.lineWidth=1;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(W-P.r,y);ctx.stroke();ctx.fillStyle='#475569';ctx.font='9px DM Mono,monospace';ctx.textAlign='right';ctx.fillText('$'+Math.round(mx*f/1000)+'k',P.l-4,y+3);});
+  let pm=-1;allDays.forEach((d,i)=>{if(d.mo!==pm){pm=d.mo;const x=xp(i);ctx.strokeStyle='#2a3a52';ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(x,P.t);ctx.lineTo(x,H-P.b);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#475569';ctx.font='9px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(['Apr','May','Jun','Jul','Aug'][d.mo-3]||'',x,H-P.b+14);}});
+  // Goal lines
+  const goals=mode==='deps'?[{v:GMIN,c:'#6366f1'},{v:GTGT,c:'#3b82f6'},{v:GHIGH,c:'#22c55e'}]:[{v:GMIN,c:'#6366f1'},{v:GTGT,c:'#3b82f6'},{v:GHIGH,c:'#22c55e'},{v:GCAM,c:'#4ade80'}];
+  goals.forEach(g=>{if(g.v>mx)return;const gy=yp(g.v);ctx.strokeStyle=g.c;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(P.l,gy);ctx.lineTo(W-P.r,gy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=g.c;ctx.font='bold 8px DM Mono,monospace';ctx.textAlign='right';ctx.fillText('$'+g.v/1000+'k',W-P.r-2,gy-3);});
+  // Work lines
+  if(mode==='work'||mode==='both'){
+    ctx.strokeStyle='#6366f1';ctx.lineWidth=2;ctx.setLineDash([]);ctx.beginPath();eL.forEach((v,i)=>i===0?ctx.moveTo(xp(i),yp(v)):ctx.lineTo(xp(i),yp(v)));ctx.stroke();
+    const pts=aL.map((v,i)=>v!=null?{x:xp(i),y:yp(v),v,exp:eL[i]}:null).filter(Boolean);
+    if(pts.length>1){for(let i=1;i<pts.length;i++){const p0=pts[i-1],p1=pts[i];ctx.strokeStyle=p1.v>=p1.exp?'#4ade80':'#ef4444';ctx.lineWidth=2.5;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);ctx.stroke();}
+    const last=pts[pts.length-1];const ahd=last.v>=last.exp;const gr=ctx.createLinearGradient(0,P.t,0,H-P.b);gr.addColorStop(0,ahd?'rgba(74,222,128,.12)':'rgba(239,68,68,.08)');gr.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(pts[0].x,H-P.b);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(last.x,H-P.b);ctx.closePath();ctx.fill();
+    ctx.fillStyle=ahd?'#4ade80':'#ef4444';ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fill();
+    // % to $6k label near dot
+    const pctTo6k=Math.min(100,Math.round((last.v/GTGT)*100));ctx.fillStyle='#3b82f6';ctx.font='bold 10px DM Sans,sans-serif';ctx.textAlign='left';const lx=Math.min(last.x+8,W-P.r-36);ctx.fillText(pctTo6k+'% to $6k',lx,last.y-6);}
   }
-
-  // Today marker
-  if(todayIdx>=0){
-    const tx=xp(todayIdx);ctx.strokeStyle='#fbbf2460';ctx.lineWidth=1;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(tx,PAD.t);ctx.lineTo(tx,H-PAD.b);ctx.stroke();ctx.setLineDash([]);
+  // Deposits line
+  if(mode==='deps'||mode==='both'){
+    const dpPts=dL.map((v,i)=>v!=null?{x:xp(i),y:yp(v)}:null).filter(Boolean);
+    if(dpPts.length>0){const gr2=ctx.createLinearGradient(0,P.t,0,H-P.b);gr2.addColorStop(0,'rgba(59,130,246,.2)');gr2.addColorStop(1,'rgba(59,130,246,0)');ctx.fillStyle=gr2;ctx.beginPath();ctx.moveTo(dpPts[0].x,H-P.b);dpPts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(dpPts[dpPts.length-1].x,H-P.b);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.setLineDash([]);ctx.beginPath();dpPts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+    let dc=START;(state.deps||[]).filter(d=>d.dateSent&&d.amtSav>0).sort((a,b)=>a.dateSent<b.dateSent?-1:1).forEach(d=>{dc+=d.amtSav||0;const i2=allDays.findIndex(dd=>dd.ds===d.dateSent);if(i2<0||d.dateSent>td)return;ctx.fillStyle='#fbbf24';ctx.strokeStyle='#0e1520';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(xp(i2),yp(dc),4,0,Math.PI*2);ctx.fill();ctx.stroke();});}
   }
+  if(ti>=0){const tx=xp(ti);ctx.strokeStyle='#fbbf2460';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(tx,P.t);ctx.lineTo(tx,H-P.b);ctx.stroke();ctx.setLineDash([]);}
 }
 
-function drawWeeklyChart(weeks,act,xpByDate){
-  const ctx=getCtx('chart-weekly');if(!ctx)return;
-  const W=ctx._w,H=ctx._h,PAD={t:14,r:12,b:36,l:48};
-  const cW=W-PAD.l-PAD.r,cH=H-PAD.t-PAD.b;
-  const earningWeeks=weeks.filter(wk=>wk.some(d=>d.e>0));
-  const wData=earningWeeks.map(wk=>{
-    const exp=wk.reduce((s,d)=>s+d.e,0);
-    const hasAct=wk.some(d=>act[d.ds]!==undefined||(xpByDate[d.ds]||0)>0);
-    const actual=hasAct?wk.reduce((s,d)=>s+(act[d.ds]??0)+(xpByDate[d.ds]||0),0):null;
-    const f=wk[0];
-    return{exp,actual,label:['Apr','May','Jun','Jul','Aug'][f.mo-3]+' '+f.dy};
-  });
-  const maxVal=Math.max(...wData.map(w=>Math.max(w.exp,w.actual||0)))*1.15||500;
-  const n=wData.length,groupW=cW/n,barW=Math.min(groupW*0.35,18);
-  ctx.fillStyle='#0e1520';ctx.beginPath();ctx.roundRect(0,0,W,H,8);ctx.fill();
-  function yp(v){return PAD.t+cH-(v/maxVal)*cH;}
-  function yh(v){return(v/maxVal)*cH;}
-  [0.25,0.5,0.75,1].forEach(f=>{
-    const y=yp(maxVal*f);ctx.strokeStyle='#1e2d42';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();
-    ctx.fillStyle='#475569';ctx.font='9px DM Mono,monospace';ctx.textAlign='right';
-    ctx.fillText('$'+Math.round(maxVal*f),PAD.l-4,y+3);
-  });
-  wData.forEach((w,i)=>{
-    const cx=PAD.l+i*groupW+groupW/2;
-    ctx.fillStyle='#1e3a5f';ctx.strokeStyle='#3b82f6';ctx.lineWidth=1;
-    ctx.beginPath();ctx.roundRect(cx-barW-2,yp(w.exp),barW,yh(w.exp),[3,3,0,0]);ctx.fill();ctx.stroke();
-    if(w.actual!==null){
-      ctx.fillStyle=w.actual>=w.exp?'#4ade80':'#fb923c';
-      ctx.beginPath();ctx.roundRect(cx+2,yp(w.actual),barW,yh(w.actual),[3,3,0,0]);ctx.fill();
-    }
-    ctx.fillStyle='#475569';ctx.font='8px DM Sans,sans-serif';ctx.textAlign='center';
-    const parts=w.label.split(' ');
-    ctx.fillText(parts[0]||'',cx,H-PAD.b+12);ctx.fillText(parts[1]||'',cx,H-PAD.b+22);
-  });
+function drawWkChart(){
+  const ctx=getCtx('cwk');if(!ctx)return;const W=ctx._w,H=ctx._h,P={t:14,r:12,b:36,l:48};const cW=W-P.l-P.r,cH=H-P.t-P.b;
+  const fbd=wkFrByDate();const eWks=weeks.filter(wk=>wk.some(d=>d.e>0));
+  const wData=eWks.map(wk=>{const exp=wk.reduce((s,d)=>s+d.e,0);const wKey=wk[0].ds;const frWkTot=(state.weekFr[wKey]||[]).reduce((s,e)=>s+(e.amount||0),0);const hasAct=wk.some(d=>state.act[d.ds]!==undefined)||frWkTot>0;const actual=hasAct?wk.reduce((s,d)=>s+(state.act[d.ds]??0)+(fbd[d.ds]||0),0)+frWkTot:null;const f=wk[0];return{exp,actual,label:(['Apr','May','Jun','Jul','Aug'][f.mo-3]||'')+' '+f.dy};});
+  const mx=Math.max(...wData.map(w=>Math.max(w.exp,w.actual||0)))*1.15||500;const n=wData.length,gW=cW/n,bW=Math.min(gW*.35,18);
+  ctx.fillStyle='#0e1520';ctx.beginPath();rr(ctx,0,0,W,H,8);ctx.fill();
+  function yp(v){return P.t+cH-(v/mx)*cH;}function yh(v){return(v/mx)*cH;}
+  [.25,.5,.75,1].forEach(f=>{const y=yp(mx*f);ctx.strokeStyle='#1e2d42';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(W-P.r,y);ctx.stroke();ctx.fillStyle='#475569';ctx.font='9px DM Mono,monospace';ctx.textAlign='right';ctx.fillText('$'+Math.round(mx*f),P.l-4,y+3);});
+  wData.forEach((w,i)=>{const cx=P.l+i*gW+gW/2;ctx.fillStyle='#1e3a5f';ctx.strokeStyle='#3b82f6';ctx.lineWidth=1;ctx.beginPath();rr(ctx,cx-bW-2,yp(w.exp),bW,yh(w.exp),[3,3,0,0]);ctx.fill();ctx.stroke();if(w.actual!=null){ctx.fillStyle=w.actual>=w.exp?'#4ade80':'#fb923c';ctx.beginPath();rr(ctx,cx+2,yp(w.actual),bW,yh(w.actual),[3,3,0,0]);ctx.fill();}ctx.fillStyle='#475569';ctx.font='8px DM Sans,sans-serif';ctx.textAlign='center';const parts=w.label.split(' ');ctx.fillText(parts[0]||'',cx,H-P.b+12);ctx.fillText(parts[1]||'',cx,H-P.b+22);});
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+function drawSavChart(td){
+  const ctx=getCtx('csav');if(!ctx)return;const W=ctx._w,H=ctx._h,P={t:16,r:20,b:28,l:52};const cW=W-P.l-P.r,cH=H-P.t-P.b;
+  const mode=state.ui.manChart||'deps';
+  const td2=today();const fbd=wkFrByDate();const bdayE=bdayEarned(td2);
+  const plotDays=dateRange("2026-04-16","2026-08-31");const ti2=plotDays.indexOf(td2);
+  // Deposit balance line
+  const depMap={};(state.deps||[]).filter(d=>d.dateSent&&d.amtSav>0).sort((a,b)=>a.dateSent<b.dateSent?-1:1).forEach(d=>{depMap[d.dateSent]=(depMap[d.dateSent]||0)+(d.amtSav||0);});
+  let cum=START;let peak=START;const balLine=[];
+  plotDays.forEach(ds=>{if(depMap[ds])cum+=depMap[ds];peak=Math.max(peak,cum);balLine.push(ds<=td2?cum:null);});
+  // Work cumulative line
+  let ce=0,ca=0;const eL=[],aL=[];
+  allDays.forEach((d,i)=>{ce+=d.e;eL.push(ce);if(i<=allDays.findIndex(dd=>dd.ds===td2))ca+=(state.act[d.ds]||0)+(fbd[d.ds]||0);aL.push(i<=allDays.findIndex(dd=>dd.ds===td2)?ca+bdayE:null);});
+  const mx=Math.max(peak,mode==='work'?Math.max(ce,GCAM):GMIN,GTGT)*1.1;const n=plotDays.length;
+  function xp(i){return P.l+(i/(n-1))*cW;}function yp(v){return P.t+cH-(v/mx)*cH;}
+  ctx.fillStyle='#0e1520';ctx.beginPath();rr(ctx,0,0,W,H,8);ctx.fill();
+  const gridVs=[0,1000,2000,3000,4000,5000,GMIN,GTGT].filter(v=>v<=mx);
+  gridVs.forEach(v=>{const y=yp(v);ctx.strokeStyle='#1e2d42';ctx.lineWidth=1;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(W-P.r,y);ctx.stroke();ctx.fillStyle='#475569';ctx.font='9px DM Mono,monospace';ctx.textAlign='right';ctx.fillText(v>=1000?'$'+v/1000+'k':'$'+v,P.l-4,y+3);});
+  let pm=-1;plotDays.forEach((ds,i)=>{const mo=new Date(ds+'T12:00:00').getMonth();if(mo!==pm){pm=mo;const x=xp(i);ctx.strokeStyle='#2a3a52';ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(x,P.t);ctx.lineTo(x,H-P.b);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#475569';ctx.font='9px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(['Apr','May','Jun','Jul','Aug'][mo-3]||'',x,H-P.b+14);}});
+  [{v:GMIN,c:'#6366f1',l:'$5.5k'},{v:GTGT,c:'#3b82f6',l:'$6k'},{v:GHIGH,c:'#22c55e',l:'$6.5k'}].forEach(g=>{if(g.v>mx)return;const gy=yp(g.v);ctx.strokeStyle=g.c;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(P.l,gy);ctx.lineTo(W-P.r,gy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=g.c;ctx.font='bold 8px DM Mono,monospace';ctx.textAlign='right';ctx.fillText(g.l,W-P.r-2,gy-3);});
+  // Work lines
+  if(mode==='work'||mode==='both'){
+    ctx.strokeStyle='#6366f1';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.beginPath();eL.forEach((v,i)=>i===0?ctx.moveTo(xp(allDays.findIndex(d=>d.ds===plotDays[i])),yp(v)):ctx.lineTo(xp(allDays.findIndex(d=>d.ds===plotDays[i])),yp(v)));ctx.stroke();ctx.setLineDash([]);
+    const wPts=aL.map((v,i)=>v!=null?{x:xp(i),y:yp(v)}:null).filter(Boolean);
+    if(wPts.length>1){ctx.strokeStyle='#34d399';ctx.lineWidth=2;ctx.beginPath();wPts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();}
+  }
+  // Deposits line
+  if(mode==='deps'||mode==='both'){
+    const pts=balLine.map((v,i)=>v!=null?{x:xp(i),y:yp(v)}:null).filter(Boolean);
+    if(pts.length>0){const gr=ctx.createLinearGradient(0,P.t,0,H-P.b);gr.addColorStop(0,'rgba(74,222,128,.2)');gr.addColorStop(1,'rgba(74,222,128,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(xp(0),H-P.b);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,H-P.b);ctx.closePath();ctx.fill();ctx.strokeStyle='#4ade80';ctx.lineWidth=2.5;ctx.setLineDash([]);ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+    let rc=START;(state.deps||[]).filter(d=>d.dateSent&&d.amtSav>0).sort((a,b)=>a.dateSent<b.dateSent?-1:1).forEach(d=>{rc+=d.amtSav||0;const i2=plotDays.indexOf(d.dateSent);if(i2<0||d.dateSent>td2)return;ctx.fillStyle='#fbbf24';ctx.strokeStyle='#0e1520';ctx.lineWidth=2;ctx.beginPath();ctx.arc(xp(i2),yp(rc),5,0,Math.PI*2);ctx.fill();ctx.stroke();});
+    const last=pts[pts.length-1];ctx.fillStyle='#4ade80';ctx.beginPath();ctx.arc(last.x,last.y,5,0,Math.PI*2);ctx.fill();
+    }else{ctx.fillStyle='#475569';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText('Log your first deposit to see the chart',P.l+cW/2,P.t+cH/2);}
+  }
+  if(ti2>=0){const tx=xp(ti2);ctx.strokeStyle='#fbbf2460';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(tx,P.t);ctx.lineTo(tx,H-P.b);ctx.stroke();ctx.setLineDash([]);}
+}
+
+// ── MAIN RENDER ────────────────────────────────────────────────────────
+function render(){
+  const td=today();const totExp=totalExpenses();const pp=compPP(td);const tab=state.ui.tab||'earn';
+  document.getElementById('app').innerHTML=`<div class="sync-bar"><span id="ss" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--tx3)">Sync ready</span><button class="sync-btn" onclick="manualSync()">↕ Sync now</button></div><div class="tab-bar"><button class="tab-btn${tab==='earn'?' active':''}" onclick="setTab('earn')">💰 Making Money</button><button class="tab-btn${tab==='manage'?' active':''}" onclick="setTab('manage')">🏦 Managing Money</button></div><div class="tab-con">${tab==='earn'?renderEarn(td,pp,totExp):renderManage(td,pp,totExp)}</div>`;
+  if(!SYNC_ON)setTimeout(()=>setSS('offline'),50);
+  setTimeout(()=>{if(tab==='earn'){drawCumChart(td);drawWkChart();}else drawSavChart(td);},120);
+  if(!Object.keys(state.ui).some(k=>k.startsWith('w'))){const cwi=weeks.findIndex(wk=>wk.some(d=>d.ds===today()));if(cwi>=0){state.ui['w'+cwi]=true;}}
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
 loadState();
-const today=getToday();
-const curWeekIdx=weeks.findIndex(wk=>wk.some(d=>d.ds===today));
-if(curWeekIdx>=0&&!state.ui["w"+curWeekIdx]) state.ui["w"+curWeekIdx]=true;
-render();
-if(SYNC_ENABLED){pullFromSheets().then(()=>render());}
-else{setTimeout(()=>setSyncStatus("offline"),50);}
+if(SYNC_ON)pullSheets().then(()=>render());else render();
 </script>
 </body>
 </html>
